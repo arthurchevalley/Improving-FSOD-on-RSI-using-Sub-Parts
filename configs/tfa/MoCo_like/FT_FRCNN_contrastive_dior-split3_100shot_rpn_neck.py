@@ -1,0 +1,49 @@
+_base_ = [
+    '../../_base_/datasets/tfa_dior.py',
+    '../../_base_/schedules/schedule_1x_iter.py',
+    '../tfa_r50_unfreeze_fpn.py',
+    '../../_base_/default_shot_runtime.py'
+]
+
+# classes splits are predefined in FewShotVOCDataset
+# FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
+
+model = dict(
+    frozen_parameters=[
+        'backbone']
+)
+data = dict(
+    train=dict(
+        type='FewShotDiorDefaultDataset',
+        ann_dif='hard',
+        ann_cfg=[dict(method='TFA', setting='SPLIT3_100SHOT')],
+        num_novel_shots=100,
+        num_base_shots=1,
+        classes='ALL_CLASSES_SPLIT3'),
+    val=dict(classes='ALL_CLASSES_SPLIT3'),
+    test=dict(classes='ALL_CLASSES_SPLIT3'))
+evaluation = dict(
+    interval=4000,
+    metric='mAP',
+    class_splits=['BASE_CLASSES_SPLIT3', 'NOVEL_CLASSES_SPLIT3'])
+optimizer = dict(lr=0.001)
+lr_config = dict(
+    policy='step',
+    warmup=None,
+    step=[20000, 25000])
+runner = dict(type='IterBasedRunner', max_iters=30000)
+checkpoint_config = dict(interval=30000)
+log_config = dict(
+    interval=50,
+    hooks=[
+        dict(type='TextLoggerHook'),
+        dict(type='CometMLLoggerHook', 
+            project_name='logger_comet_ml',
+            api_key= 'UavGjAWatUgY4kp6T3tv3VWuS')
+    ])
+# base model needs to be initialized with following script:
+# python -m tools.misc.initialize_bbox_head --src1 work_dirs/tfa_rsp_faster_rcnn_dior-base-split3_BranchPT/epoch_12.pth --method random_init --tar-name base_contrastive_model_noContHead --save-dir work_dirs/tfa_rsp_faster_rcnn_dior-base-split3_BranchPT --no_contrastive_head --dior
+# please refer to configs/detection/tfa/README.md for more details.
+
+
+load_from = ('work_dirs/tfa_rsp_faster_rcnn_dior-base-split3_BranchPT_lrlow/base_contrastive_model_noContHead_random_init_bbox_head.pth')

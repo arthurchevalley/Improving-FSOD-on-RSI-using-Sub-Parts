@@ -1,0 +1,25 @@
+
+
+data/
+data
+
+# custom
+*.pkl
+*.pkl.json
+*.log.json
+work_dirs/
+
+# custom from arthur
+*.pth
+*.p
+*.png
+*.jpg
+plots/
+
+
+
+
+# Pytorch
+*.pth
+*.py~
+*.sh~
