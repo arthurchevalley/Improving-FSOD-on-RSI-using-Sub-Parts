@@ -1,7 +1,7 @@
 # Prerequisites
 
 
-**Step 0.** Download and install Miniconda from the [official website](https://docs.conda.io/en/latest/miniconda.html).
+**Step 0.** Download and install mamba from the [official github]([https://docs.conda.io/en/latest/miniconda.html](https://github.com/mamba-org/mamba)).
 
 **Step 1.** Create a mamba environment and activate it.
 
