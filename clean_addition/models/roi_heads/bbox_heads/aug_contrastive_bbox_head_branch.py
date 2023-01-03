@@ -7,11 +7,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.runner import force_fp32
 from mmdet.models.builder import HEADS, build_loss
-from .convfc_bbox_head import Shared2FCBBoxHeadUpdate
+from .convfc_bbox_head import Shared2FCBBoxHead
 import numpy as np
 import pickle 
 @HEADS.register_module()
-class AugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
+class AugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -346,7 +346,7 @@ class AugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
         return losses
 
 @HEADS.register_module()
-class QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
+class QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -601,8 +601,10 @@ class QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
                     self.queue_res[len_id * queue_length_frac+ptr,:] = new_aug[0].detach()
                     self.queue_trg[len_id * queue_length_frac+ptr,:] = new_aug[1].detach()
                     self.queue_iou[len_id * queue_length_frac+ptr,:] = new_aug[2].detach()
+                    len_id += 1
             if update:
-                ptr = (ptr + 1) % queue_length_frac  # move pointer
+                ptr = (ptr + len_id) % queue_length_frac
+                #ptr = (ptr + 1) % queue_length_frac  # move pointer OLD & WRONG
 
                 self.queue_ptr[0] = ptr
 
