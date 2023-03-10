@@ -1,6 +1,7 @@
 ## Introduction
 
-Few-shot object detection on remote sensing images for DIOR horizontal bounding boxes using contrastive Faster R-CNN with Sub-Parts![Model architecture](final_model_arch.png).
+Few-shot object detection on remote sensing images for DIOR horizontal bounding boxes using contrastive Faster R-CNN with Sub-Parts 
+![Model architecture](final_model_arch.png).
 
 Based on MMDetection object detection toolbox based on PyTorch which is
 a part of the [OpenMMLab](https://openmmlab.com/) project.
