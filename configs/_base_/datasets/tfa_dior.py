@@ -40,6 +40,7 @@ data = dict(
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
+        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
         ann_cfg=[
             dict(
                 type='ann_file',
@@ -50,6 +51,7 @@ data = dict(
         classes=None),
     val=dict(
         type=dataset_type,
+        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
         ann_cfg=[
             dict(
                 type='ann_file',
@@ -60,6 +62,7 @@ data = dict(
         classes=None),
     test=dict(
         type=dataset_type,
+        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
         ann_cfg=[
             dict(
                 type='ann_file',

@@ -2,16 +2,26 @@ from ..builder import PIPELINES
 import numpy as np
 import cv2
 from PIL import Image
+from torchvision.utils import save_image
 import torch
-#from .transforms import Albu
+import torchvision
+from .transforms import Albu
 from mmcv.parallel import DataContainer as DC
 import albumentations as A
 import torch
+import torch.nn as nn
+
 import mmcv
 import torchvision
 from collections.abc import Sequence
 
 import sys
+import math
+
+import math
+from skimage import io, color
+from tqdm import trange
+
 
 
 def bbox2fields():
@@ -32,288 +42,25 @@ def bbox2fields():
 
 
 @PIPELINES.register_module()
-class nBBOX:
-
-    def __init__(self,
-                 out_max = 15,
-                 nbr_nBBOX = 3,
-                 min_bbox_size = 5,
-                 batch_size = 2,
-                 nbr_class = 19,
-                 BBOX_scaling = 0.3
-                 ):
-                 
-        self.nbr_nBBOX = nbr_nBBOX
-        self.out_max = out_max
-        self.start_id = nbr_class + 1
-        self.min_size_bbox = min_bbox_size
-        self.batch_size = batch_size
-        self.t = 0
-        self.reset_cntr = 0
-        self.BBOX_scaling = BBOX_scaling
-        self.bbox2label = {
-            'gt_bboxes': 'gt_labels',
-            'gt_bboxes_ignore': 'gt_labels_ignore'
-        }
-    def _create_nBBOX(self, results):
-
-        if np.any(results['img']<0):
-            print("Neg before create nBBOX")
-        bboxes = results['gt_bboxes'] 
-        nbboxes_per_bbox = []
-        nlabels_per_bbox = []
-        img_shape = results['img_shape']
-        gt_nlabel = []
-        gt_nbboxes = []
-        for id in range(bboxes.shape[0]):
-            
-            xmin = int(bboxes[id][0])
-            ymin = int(bboxes[id][1])
-            xmax = int(bboxes[id][2])
-            ymax = int(bboxes[id][3])
-            if xmin >= xmax or ymin >= ymax: 
-                continue
-            gt_nlabel = []
-            gt_nbboxes = []
-            for cid in range(self.nbr_nBBOX):
-                cx = np.random.randint(xmin, xmax)
-                cy = np.random.randint(ymin, ymax)
-                scalex, scaley = np.random.random(2)
-                dx = scalex*max(cx - xmin, xmax - cx)
-                dy = scaley*max(cy - ymin, ymax - cy)
-                if dx < self.min_size_bbox/2:
-                    dx = self.min_size_bbox/2
-                if dy < self.min_size_bbox/2:
-                    dy = self.min_size_bbox/2
-                nxmin = int(cx - dx)
-                nxmax = int(cx + dx)
-                nymin = int(cy - dy)
-                nymax = int(cy + dy)
-
-                if self.out_max: 
-                    if nxmin < (xmin - self.out_max): nxmin = xmin - self.out_max
-                    if nxmax > (xmax + self.out_max): nxmax = xmax + self.out_max
-                    if nymin < (ymin - self.out_max): nymin = ymin - self.out_max
-                    if nymax > (ymax + self.out_max): nymax = ymax + self.out_max
-                else:
-                    if nxmin < xmin: nxmin = xmin
-                    if nxmax > xmax: nxmax = xmax
-                    if nymin < ymin: nymin = ymin
-                    if nymax > ymax: nymax = ymax
-                nxmin = max(0, nxmin)
-                nymin = max(0, nymin)
-                nxmax = min(img_shape[0], nxmax)
-                nymax = min(img_shape[1], nymax)
-                gt_nbboxes.append([nxmin, nymin, nxmax, nymax])
-                gt_nlabel.append(self.start_id + cid + self.t)
-            nbboxes_per_bbox.append(np.clip(np.stack(gt_nbboxes), 0, img_shape[1]))
-            nlabels_per_bbox.append(np.clip(np.stack(gt_nlabel), 0, img_shape[0]))
-            self.t += self.nbr_nBBOX
-        nbboxes_per_bbox = np.array(nbboxes_per_bbox)
-        nlabels_per_bbox = np.array(nlabels_per_bbox)
-
-        results['gt_nbboxes'] = nbboxes_per_bbox
-        results['gt_nlabels'] = nlabels_per_bbox
-        results['nimg'] = results['img'].copy()
-        self.reset_cntr += 1
-        if not self.reset_cntr%self.batch_size:
-            self.t = 0
-    
-    def __call__(self, results):
-        self._create_nBBOX(results)
-        #self._nBBOX_augment(results)
-        return results
-
-@PIPELINES.register_module()
-class Scaled_nBBOX:
-
-    def __init__(self,
-                 out_max = 15,
-                 nbr_nBBOX = 3,
-                 min_bbox_size = 5,
-                 batch_size = 2,
-                 nbr_class = 19,
-                 BBOX_scaling = 0.3
-                 ):
-                 
-        self.nbr_nBBOX = nbr_nBBOX
-        self.out_max = out_max
-        self.start_id = nbr_class + 1
-        self.batch_size = batch_size
-        self.t = 0
-        self.reset_cntr = 0
-        self.BBOX_scaling = BBOX_scaling
-        self.bbox2label = {
-            'gt_bboxes': 'gt_labels',
-            'gt_bboxes_ignore': 'gt_labels_ignore'
-        }
-        
-    def _create_nBBOX_Scaled(self, results):
-
-        if np.any(results['img']<0):
-            print("Neg before create nBBOX")
-        bboxes = results['gt_bboxes'] 
-        nbboxes_per_bbox = []
-        nlabels_per_bbox = []
-        gt_nlabel_true = []
-        img_shape = results['img_shape']
-        gt_nlabel = []
-        gt_nbboxes = []
-
-        for id in range(bboxes.shape[0]):
-            xmin = int(bboxes[id][0])
-            ymin = int(bboxes[id][1])
-            xmax = int(bboxes[id][2])
-            ymax = int(bboxes[id][3])
-            if xmin >= xmax or ymin >= ymax: 
-                continue
-            gt_nlabel = []
-            gt_nbboxes = []
-            for cid in range(self.nbr_nBBOX):
-                cx = np.random.randint(xmin, xmax)
-                cy = np.random.randint(ymin, ymax)
-                scalex, scaley = np.random.random(2)
-                dx = scalex*max(cx - xmin, xmax - cx)
-                dy = scaley*max(cy - ymin, ymax - cy)
-                BBOX_scale_X, BBOX_scale_Y = self.BBOX_scaling + (1-self.BBOX_scaling) * np.random.random(2)
-                if 2*dx < BBOX_scale_X*(xmax - xmin):
-                    dx = BBOX_scale_X*(xmax - xmin)/2
-                if 2*dy < BBOX_scale_Y*(ymax - ymin):
-                    dy = BBOX_scale_Y*(xmax - xmin)/2
-                nxmin = int(cx - dx)
-                nxmax = int(cx + dx)
-                nymin = int(cy - dy)
-                nymax = int(cy + dy)
-
-                if self.out_max: 
-                    if nxmin < (xmin - self.out_max): nxmin = xmin - self.out_max
-                    if nxmax > (xmax + self.out_max): nxmax = xmax + self.out_max
-                    if nymin < (ymin - self.out_max): nymin = ymin - self.out_max
-                    if nymax > (ymax + self.out_max): nymax = ymax + self.out_max
-                else:
-                    if nxmin < xmin: nxmin = xmin
-                    if nxmax > xmax: nxmax = xmax
-                    if nymin < ymin: nymin = ymin
-                    if nymax > ymax: nymax = ymax
-                nxmin = max(0, nxmin)
-                nymin = max(0, nymin)
-                nxmax = min(img_shape[0], nxmax)
-                nymax = min(img_shape[1], nymax)
-                gt_nbboxes.append([nxmin, nymin, nxmax, nymax])
-                gt_nlabel.append(self.start_id + cid + self.t)
-
-            nbboxes_per_bbox.append(np.clip(np.stack(gt_nbboxes), 0, img_shape[1]))
-            nlabels_per_bbox.append(np.stack(gt_nlabel))
-            gt_nlabel_true.append([results['gt_labels'][id]]*self.nbr_nBBOX)
-
-            #nbboxes_per_bbox.append(np.clip(np.stack(gt_nbboxes), 0, img_shape[1]))
-            #nlabels_per_bbox.append(np.clip(np.stack(gt_nlabel), 0, img_shape[0]))
-
-            #nbboxes_per_bbox.append(torch.clip(torch.tensor(gt_nbboxes), 0, img_shape[1]))
-            #nlabels_per_bbox.append(torch.clip(torch.tensor(gt_nlabel), 0, img_shape[0]))
-
-            self.t += self.nbr_nBBOX
-        #nbboxes_per_bbox = torch.stack(nbboxes_per_bbox)
-        #nlabels_per_bbox = torch.stack(nlabels_per_bbox)
-
-        nbboxes_per_bbox = np.array(nbboxes_per_bbox)
-        nlabels_per_bbox = np.array(nlabels_per_bbox)
-        gt_nlabel_true = np.array(gt_nlabel_true)
-        results['nimg'] = results['img'].copy()
-        results['gt_nbboxes'] = nbboxes_per_bbox
-        results['gt_nlabels'] = nlabels_per_bbox
-        results['gt_nlabels_true'] = gt_nlabel_true
-        
-        self.reset_cntr += 1
-        if not self.reset_cntr%self.batch_size:
-            self.t = 0
-
-
-    def _nBBOX_augment(self, results):
-
-        img = results['nimg']
-        bboxes = results['gt_nbboxes']
-        labels = results['gt_nlabels']
-
-        transform = A.ReplayCompose(
-                    [
-                        A.HorizontalFlip(p=0.8),
-                        A.VerticalFlip(p=0.8),
-                        #A.Affine (scale=(0.9, 1.1), rotate=(0), p=0.8),
-                       #A.RandomBrightnessContrast(p=0.3),
-                    ],
-                        bbox_params=
-                            A.BboxParams(format='pascal_voc', min_visibility=0.5, label_fields=['class_labels']),
-                    )
-                    
-        list_of_bbox = bboxes
-        list_of_labels = labels
-        
-        aug_img = []
-        aug_bboxes = []
-        aug_labels = []
-
-        # for each image
-        for batch_id in range(len(list_of_bbox)):
-            aug_bboxes_tmp = []
-            aug_labels_tmp = []
-
-            # for each object on the image
-            for bbox_id in range(list_of_labels[batch_id].shape[0]):
-                current_labels = list_of_labels[batch_id][bbox_id]
-                
-                current_bboxes = list_of_bbox[batch_id][bbox_id]
-                
-                current_img = img[batch_id]
-                
-                
-                if not bbox_id:
-                    transformed = transform(image=current_img, bboxes=current_bboxes, class_labels=current_labels)
-                    applied_transform = []
-                    to_print = transformed['replay']['transforms']
-
-                    for tran in transformed['replay']['transforms']:
-                        if tran['applied']:
-                            applied_transform.append([tran['__class_fullname__'], tran['params']])
-                    
-                else:
-                    transformed = A.ReplayCompose.replay(transformed['replay'], image=current_img, bboxes=current_bboxes, class_labels=current_labels)
-                    to_print = transformed['replay']['transforms']
-
-                aug_bboxes_tmp.append(transformed['bboxes'])
-                aug_labels_tmp.append(transformed['class_labels'])
-
-            aug_bboxes.append(aug_bboxes_tmp)
-            aug_labels.append(aug_labels_tmp)
-            aug_img.append(torch.tensor(transformed['image']))
-
-        img_aug = torch.cat((torch.unsqueeze(img_aug[0], dim=0), torch.unsqueeze(img_aug[1], dim=0)), dim=0)
-        img_aug = torch.movedim(img_aug, (1, 2), (2,3))
-
-        results['aug_img'] = aug_img
-        results['aug_bboxes'] = aug_bboxes
-        results['aug_labels'] = aug_labels
-        results['applied_transform'] = applied_transform
-        
-
-    def __call__(self, results):
-        self._create_nBBOX_Scaled(results)
-        # shape of nimg: list of batch length and each has: C x H x W
-        # shape of img: list of batch length and each has: H x W x C
-        
-        # shape of img aug is batch x H x W x C
-        
-        return results
-
-@PIPELINES.register_module()
 class AugScaled_nBBOX:
+    """
+    Sub-Parts main classes that handles creation and augmentation
+
+    Args:
+        out_max; Define the maximum number of pixels from the Sub-Parts that geos out of the base object
+        nbr_nBBOX; Define the number of Sub-Parts
+        min_bbox_size; Define the minium box width/height of the Sub-Parts
+        batch_size; Dataloader batch size 
+        nbr_class; Number of classes in the dataset
+        BBOX_scaling; defines the minimum Sub-Parts size based on the ratio of original object 
+    """
 
     def __init__(self,
                  out_max = 15,
                  nbr_nBBOX = 3,
                  min_bbox_size = 5,
                  batch_size = 2,
-                 nbr_class = 19,
+                 nbr_class = 20,
                  BBOX_scaling = 0.3
                  ):
                  
@@ -346,14 +93,17 @@ class AugScaled_nBBOX:
             ymin = int(bboxes[id][1])
             xmax = int(bboxes[id][2])
             ymax = int(bboxes[id][3])
+
+            # Only keep the valide BBOX
             if xmin >= xmax or ymin >= ymax: 
                 continue
-            #gt_nlabel = []
-            #gt_nbboxes = []
             for cid in range(self.nbr_nBBOX):
+                # Random center selection
                 cx = np.random.randint(xmin, xmax)
                 cy = np.random.randint(ymin, ymax)
                 scalex, scaley = np.random.random(2)
+
+                # Defines the Sub-Part width and height
                 dx = scalex*max(cx - xmin, xmax - cx)
                 dy = scaley*max(cy - ymin, ymax - cy)
                 BBOX_scale_X, BBOX_scale_Y = self.BBOX_scaling + (1-self.BBOX_scaling) * np.random.random(2)
@@ -366,6 +116,7 @@ class AugScaled_nBBOX:
                 nymin = int(cy - dy)
                 nymax = int(cy + dy)
 
+                # Handles the maximum Sub-Part overflow of the base object
                 if self.out_max: 
                     if nxmin < (xmin - self.out_max): nxmin = xmin - self.out_max
                     if nxmax > (xmax + self.out_max): nxmax = xmax + self.out_max
@@ -383,19 +134,8 @@ class AugScaled_nBBOX:
                 gt_nbboxes.append([nxmin, nymin, nxmax, nymax])
                 gt_nlabel.append(self.start_id + cid + self.t)
                 gt_nlabel_true.append(results['gt_labels'][id])
-            #nbboxes_per_bbox.append(np.clip(np.stack(gt_nbboxes), 0, img_shape[1]))
-            #nlabels_per_bbox.append(np.stack(gt_nlabel))
-            #gt_nlabel_true.append([results['gt_labels'][id]]*self.nbr_nBBOX)
-
-            #nbboxes_per_bbox.append(np.clip(np.stack(gt_nbboxes), 0, img_shape[1]))
-            #nlabels_per_bbox.append(np.clip(np.stack(gt_nlabel), 0, img_shape[0]))
-
-            #nbboxes_per_bbox.append(torch.clip(torch.tensor(gt_nbboxes), 0, img_shape[1]))
-            #nlabels_per_bbox.append(torch.clip(torch.tensor(gt_nlabel), 0, img_shape[0]))
 
             self.t += self.nbr_nBBOX
-        #nbboxes_per_bbox = torch.stack(nbboxes_per_bbox)
-        #nlabels_per_bbox = torch.stack(nlabels_per_bbox)
 
         nbboxes_per_bbox = np.array(gt_nbboxes)
         nlabels_per_bbox = np.array(gt_nlabel)
@@ -410,7 +150,9 @@ class AugScaled_nBBOX:
 
 
     def _nBBOX_augment(self, results):
-
+        """
+        Augmentations of the original BBOX as well as the Sub-Parts
+        """
         img = results['nimg']
         bboxes = results['gt_nbboxes']
         labels = results['gt_nlabels']
@@ -419,8 +161,6 @@ class AugScaled_nBBOX:
                     [
                         A.HorizontalFlip(p=0.8),
                         A.VerticalFlip(p=0.8),
-                        #A.Affine (scale=(0.9, 1.1), rotate=(0), p=0.8),
-                       #A.RandomBrightnessContrast(p=0.3),
                     ],
                         bbox_params=
                             A.BboxParams(format='pascal_voc', min_visibility=0.5, label_fields=['class_labels']),
@@ -478,10 +218,6 @@ class AugScaled_nBBOX:
 
     def __call__(self, results):
         self._create_nBBOX_Scaled(results)
-        # shape of nimg: list of batch length and each has: C x H x W
-        # shape of img: list of batch length and each has: H x W x C
-        
-        # shape of img aug is batch x H x W x C
         
         return results
 
@@ -1013,8 +749,6 @@ class MultiRandomFlip:
     def __repr__(self):
         return self.__class__.__name__ + f'(flip_ratio={self.flip_ratio})'
 
-
-
 @PIPELINES.register_module()
 class NovelNormalize:
     """Normalize the image.
@@ -1102,7 +836,6 @@ class ContrastiveDefaultFormatBundle:
             dict: The result dict contains the data that is formatted with \
                 default bundle.
         """
-
 
         for img_key in ['img']:
             img = results[img_key]

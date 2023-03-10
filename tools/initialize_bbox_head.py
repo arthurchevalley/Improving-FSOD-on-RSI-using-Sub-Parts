@@ -99,6 +99,8 @@ VOC_TAR_SIZE = 20
 DOTA_SIZE = 16
 
 DIOR_SIZE = 20
+DIOR_SIZE_SPLIT_2 = 15
+XVIEW_SIZE = 62
 def parse_args():
     parser = argparse.ArgumentParser()
     # Paths
@@ -123,7 +125,7 @@ def parse_args():
         '--param-name',
         type=str,
         nargs='+',
-        default=['roi_head.bbox_head.fc_cls', 'roi_head.bbox_head.fc_reg'],
+        default=['roi_head.bbox_head.fc_cls', 'roi_head.bbox_head.fc_reg'],#, 'roi_head.bbox_head.queue_res', 'roi_head.bbox_head.queue_trg', 'roi_head.bbox_head.queue_iou'],
         help='Target parameter names')
     parser.add_argument(
         '--tar-name',
@@ -136,8 +138,9 @@ def parse_args():
     parser.add_argument('--lvis', action='store_true', help='For LVIS models')
     parser.add_argument('--voc', action='store_true', help='For VOC models')
     parser.add_argument('--dior', action='store_true', help='For DIOR models')
+    parser.add_argument('--xview', action='store_true', help='For xView models')
     parser.add_argument('--hbb', action='store_true', help='For HBB DOTA dataset')
-    parser.add_argument('--no_contrastive_head', action='store_true', help='For HBB DOTA dataset')
+    parser.add_argument('--contrastive_head', action='store_true', help='For HBB DOTA dataset')
     
     parser.add_argument('--full_rnd', action='store_true', help='Fully random init')
     return parser.parse_args()
@@ -181,9 +184,14 @@ def random_init_checkpoint(param_name, is_weight, tar_size, checkpoint, args):
                 new_weight[:prev_cls] = pretrained_weight[:prev_cls]
         if 'fc_cls' in param_name:
             new_weight[-1] = pretrained_weight[-1]  # bg class
+        old_w = checkpoint['state_dict'][weight_name]
+        print('==========')
+        print(f'name {weight_name}')
+        print(f'before {old_w}')
         checkpoint['state_dict'][weight_name] = new_weight
+        print(f'after {new_weight}')
 
-def random_init_checkpoint_no_contrastive_head(param_name, is_weight, tar_size, checkpoint, args):
+def random_init_checkpoint_contrastive_head(param_name, is_weight, tar_size, checkpoint, args):
     """Either remove the final layer weights for fine-tuning on novel dataset
     or append randomly initialized weights for the novel classes.
 
@@ -192,37 +200,44 @@ def random_init_checkpoint_no_contrastive_head(param_name, is_weight, tar_size, 
     (this design choice has no particular reason). Thus, the random
     initialization step is not really necessary.
     """
+    if 'queue' not in param_name:
+        weight_name = param_name + ('.weight' if is_weight else '.bias')
+    
+        if weight_name in checkpoint['state_dict'].keys():
+            pretrained_weight = checkpoint['state_dict'][weight_name]
+            prev_cls = pretrained_weight.size(0)
 
-    weight_name = param_name + ('.weight' if is_weight else '.bias')
-    if weight_name in checkpoint['state_dict'].keys() and 'contrastive_head' not in param_name:
-        pretrained_weight = checkpoint['state_dict'][weight_name]
-        prev_cls = pretrained_weight.size(0)
-
-        if 'fc_cls' in param_name:
-            prev_cls -= 1
-        if is_weight:
-            feat_size = pretrained_weight.size(1)
-            new_weight = torch.rand((tar_size, feat_size))
-            torch.nn.init.normal_(new_weight, 0, 0.01)
-        else:
-            new_weight = torch.zeros(tar_size)
-        if args.coco or args.lvis:
-            BASE_CLASSES = COCO_BASE_CLASSES if args.coco else LVIS_BASE_CLASSES
-            IDMAP = COCO_IDMAP if args.coco else LVIS_IDMAP
-            for i, c in enumerate(BASE_CLASSES):
-                idx = i if args.coco else c
-                if 'fc_cls' in param_name:
-                    new_weight[IDMAP[c]] = pretrained_weight[idx]
-                else:
-                    new_weight[IDMAP[c] * 4:(IDMAP[c] + 1) * 4] = \
-                        pretrained_weight[idx * 4:(idx + 1) * 4]
-        else:
-            if not args.full_rnd:
-                new_weight[:prev_cls] = pretrained_weight[:prev_cls]
-        if 'fc_cls' in param_name:
-            new_weight[-1] = pretrained_weight[-1]  # bg class
-        checkpoint['state_dict'][weight_name] = new_weight
-
+            if 'fc_cls' in param_name:
+                prev_cls -= 1
+            if is_weight:
+                feat_size = pretrained_weight.size(1)
+                new_weight = torch.rand((tar_size, feat_size))
+                torch.nn.init.normal_(new_weight, 0, 0.01)
+            else:
+                new_weight = torch.zeros(tar_size)
+            if args.coco or args.lvis:
+                BASE_CLASSES = COCO_BASE_CLASSES if args.coco else LVIS_BASE_CLASSES
+                IDMAP = COCO_IDMAP if args.coco else LVIS_IDMAP
+                for i, c in enumerate(BASE_CLASSES):
+                    idx = i if args.coco else c
+                    if 'fc_cls' in param_name:
+                        new_weight[IDMAP[c]] = pretrained_weight[idx]
+                    else:
+                        new_weight[IDMAP[c] * 4:(IDMAP[c] + 1) * 4] = \
+                            pretrained_weight[idx * 4:(idx + 1) * 4]
+            else:
+                if not args.full_rnd:
+                    new_weight[:prev_cls] = pretrained_weight[:prev_cls]
+            if 'fc_cls' in param_name:
+                new_weight[-1] = pretrained_weight[-1]  # bg class
+            checkpoint['state_dict'][weight_name] = new_weight
+    elif is_weight and 'trg' in param_name:
+        pretrained_weight = checkpoint['state_dict'][param_name]
+        print(f'{param_name} shape {pretrained_weight}')
+        mask_background = pretrained_weight >= DIOR_SIZE_SPLIT_2
+        pretrained_weight[mask_background] = DIOR_SIZE
+        print(f'{param_name} shape {pretrained_weight}')
+    
 def combine_checkpoints(param_name, is_weight, tar_size, checkpoint,
                         checkpoint2, args):
     """Combine base detector with novel detector.
@@ -309,6 +324,8 @@ def main():
         TAR_SIZE = DOTA_SIZE
     elif args.dior:
         TAR_SIZE = DIOR_SIZE
+    elif args.xview:
+        TAR_SIZE = XVIEW_SIZE
 
     if args.method == 'remove':
         # Remove parameters
@@ -327,13 +344,16 @@ def main():
                                 checkpoint2, args)
     elif args.method == 'random_init':
         if args.hbb or args.dior:
-            tar_sizes = [TAR_SIZE + 1, TAR_SIZE * 4]
+            if args.contrastive_head:
+                tar_sizes = [TAR_SIZE + 1, TAR_SIZE * 4, 0,0,0]
+            else:
+                tar_sizes = [TAR_SIZE + 1, TAR_SIZE * 4]
             for idx, (param_name,
                       tar_size) in enumerate(zip(args.param_name, tar_sizes)):
-                if args.no_contrastive_head:
-                    random_init_checkpoint_no_contrastive_head(param_name, True, tar_size, checkpoint,
+                if args.contrastive_head:
+                    random_init_checkpoint_contrastive_head(param_name, True, tar_size, checkpoint,
                                         args)
-                    random_init_checkpoint_no_contrastive_head(param_name, False, tar_size, checkpoint,
+                    random_init_checkpoint_contrastive_head(param_name, False, tar_size, checkpoint,
                                         args)
                 else:
                     random_init_checkpoint(param_name, True, tar_size, checkpoint,

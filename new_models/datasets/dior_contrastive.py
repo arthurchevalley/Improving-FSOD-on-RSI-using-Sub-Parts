@@ -29,7 +29,8 @@ from collections import OrderedDict
 
 from .base import BaseFewShotDataset
 from .builder import DATASETS
-from .voc import VOCDataset
+from mmdet.datasets.voc import VOCDataset
+from mmdet.datasets.pipelines import Compose
 
 import copy
 
@@ -55,12 +56,10 @@ DIOR_SPLIT = dict(
                             'Expressway-Service-area' ,'stadium', 'airport', 'baseballfield',
                             'bridge' ,'windmill', 'overpass','vehicle'),
 
-# ===================== #
     NOVEL_CLASSES_SPLIT1 = (['vehicle']),
     NOVEL_CLASSES_SPLIT2 = ('airplane', 'windmill', 'baseballfield', 'tenniscourt', 'trainstation'),
     NOVEL_CLASSES_SPLIT3 = ('windmill', 'ship', 'trainstation'),    
 
-# ===================== #
     BASE_CLASSES_SPLIT1 = ('golffield', 'Expressway-toll-station', 'trainstation', 'chimney',
                             'storagetank', 'ship', 'harbor', 'airplane', 
                             'groundtrackfield', 'tenniscourt', 'dam', 'basketballcourt',
@@ -129,8 +128,8 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
                  test_mode: bool = False,
                  coordinate_offset: List[int] = [-1, -1, -1, -1],
                  fsod_enable = False,
+                 dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
                  difficulty = 100,
-                 fewshot_path = '/home/archeval/FSOD_mmdet_clean/data/dior2/',
                  **kwargs) -> None:
         if dataset_name is None:
             self.dataset_name = 'Test dataset' \
@@ -150,6 +149,8 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
         self.num_base_shots = num_base_shots
         self.min_bbox_area = min_bbox_area
         self.CLASSES = self.get_classes(classes)
+
+        self.dior_folder_path = dior_folder_path
         # `ann_shot_filter` will be used to filter out excess annotations
         # for few shot setting. It can be configured manually or generated
         # by the `num_novel_shots` and `num_base_shots`
@@ -164,8 +165,6 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
         self.coordinate_offset = coordinate_offset
         self.use_difficult = use_difficult
 
-        self.fewshot_path = fewshot_path
-        
         super().__init__(
             classes=None,
             ann_shot_filter=ann_shot_filter,
@@ -214,16 +213,21 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
         if self.multi_pipelines is not None:
             # normal novel aug finish
             results_base = self.multi_pipelines['normal'](results_base)
+
             results_novel = copy.deepcopy(results_base)
             results_base = self.multi_pipelines['finish'](results_base)
 
 
+
             results_novel = self.multi_pipelines['novel'](results_novel)
+
+
             results_augmented = copy.deepcopy(results_novel)
             results_novel = self.multi_pipelines['finish'](results_novel)
 
             results_augmented = self.multi_pipelines['augmented'](results_augmented)
             results_augmented = self.multi_pipelines['finish'](results_augmented)
+            
 
 
             to_return = dict(base=results_base, novel=results_novel, augmented=results_augmented, img=results_base['img'], img_metas=results_augmented['img_metas'])
@@ -463,9 +467,7 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
         labels = []
         bboxes_ignore = []
         labels_ignore = []
-        #xml_path = f'/home/archeval/mmdetection/CATNet/mmdetection/data/dior/Annotations/{img_id}.xml'
-        xml_path = self.fewshot_path + 'Annotations/'+img_id+'.xml'
-        #xml_path = f'/data/dior/Annotations/{img_id}.xml'
+        xml_path = f'{self.dior_folder_path}/Annotations/{img_id}.xml'
         tree = ET.parse(xml_path)
         root = tree.getroot()
         size = root.find('size')
@@ -700,19 +702,19 @@ class ContrastiveFewShotDiorDefaultDataset(ContrastiveFewShotDiorDataset):
     """
 
     
-    def __init__(self, ann_dif, ann_cfg: List[Dict], fewshot_path = '/home/archeval/FSOD_mmdet_clean/data/dior/', **kwargs) -> None:
+    def __init__(self, dior_folder_path, ann_dif, ann_cfg: List[Dict], **kwargs) -> None:
         self.fsod = True
-        self.fewshot_path = fewshot_path
+        
         self.dior_benchmark = {
         f'SPLIT{split}_{shot}SHOT': [
             dict(
                 type='ann_file',
-                ann_file= self.fewshot_path + 'few_shot_ann/hard_benchmark_'+str(shot)+'shot/box_'+str(shot)+'shot_'+class_name+'_train.txt',
-                #ann_file=f'/home/archeval/mmdetection/CATNet/mmdetection/data/dior/few_shot_ann/hard_benchmark_{shot}shot/box_{shot}shot_{class_name}_train.txt'
+                ann_file=f'{dior_folder_path}/few_shot_ann/hard_benchmark_{shot}shot/'
+                f'box_{shot}shot_{class_name}_train.txt',
                 ann_classes=[class_name])
             for class_name in DIOR_SPLIT[f'ALL_CLASSES_SPLIT{split}']
         ]
-        for shot in [1, 5, 10, 50, 100, 150] for split in [1, 2, 3]
+        for shot in [1, 5, 10, 20, 50, 100, 150] for split in [1, 2, 3]
         }
 
         # pre-defined annotation config for model reproducibility
@@ -724,7 +726,7 @@ class ContrastiveFewShotDiorDefaultDataset(ContrastiveFewShotDiorDataset):
             self.DEFAULT_ANN_CONFIG = dict(MPSR=self.dior_benchmark)
 
 
-        super().__init__(ann_cfg=ann_cfg, fewshot_path=fewshot_path, **kwargs)
+        super().__init__(ann_cfg=ann_cfg, **kwargs)
 
     def ann_cfg_parser(self, ann_cfg: List[Dict]) -> List[Dict]:
         """Parse pre-defined annotation config to annotation information.
@@ -771,18 +773,19 @@ class ContrastiveFewShotDiorDefaultDatasetNoDif(ContrastiveFewShotDiorDataset):
     """
 
     
-    def __init__(self, ann_cfg: List[Dict], **kwargs) -> None:
+    def __init__(self, dior_folder_path,ann_cfg: List[Dict], **kwargs) -> None:
         self.fsod = True
+        
         self.dior_benchmark = {
         f'SPLIT{split}_{shot}SHOT': [
             dict(
                 type='ann_file',
-                ann_file= self.fewshot_path + 'few_shot_ann/hard_benchmark_'+str(shot)+'shot/box_'+str(shot)+'shot_'+class_name+'_train.txt',
-                #ann_file=f'/home/archeval/mmdetection/CATNet/mmdetection/data/dior/few_shot_ann/hard_benchmark_{shot}shot/box_{shot}shot_{class_name}_train.txt',
+                ann_file=f'{dior_folder_path}/few_shot_ann/hard_benchmark_{shot}shot/'
+                f'box_{shot}shot_{class_name}_train.txt',
                 ann_classes=[class_name])
             for class_name in DIOR_SPLIT[f'ALL_CLASSES_SPLIT{split}']
         ]
-        for shot in [1, 5, 10, 50, 100, 150] for split in [1, 2, 3]
+        for shot in [1, 5, 10, 20, 50, 100, 150] for split in [1, 2, 3]
         }
 
         # pre-defined annotation config for model reproducibility

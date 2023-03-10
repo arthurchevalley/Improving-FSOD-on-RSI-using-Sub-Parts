@@ -29,7 +29,7 @@ from collections import OrderedDict
 
 from .base import BaseFewShotDataset
 from .builder import DATASETS
-from .voc import VOCDataset
+from mmdet.datasets.voc import VOCDataset
 
 @DATASETS.register_module()
 class DIORDataset(VOCDataset):
@@ -45,7 +45,7 @@ class DIORDataset(VOCDataset):
         self.year = 2012
 
                             
-
+# DIOR classes split defintion for few-shot object detection
 DIOR_SPLIT = dict(
 
     ALL_CLASSES_SPLIT1 = ('golffield', 'Expressway-toll-station' ,'trainstation' ,'chimney',
@@ -66,12 +66,11 @@ DIOR_SPLIT = dict(
                             'Expressway-Service-area' ,'stadium', 'airport', 'baseballfield',
                             'bridge' ,'windmill', 'overpass','vehicle'),
 
-# ===================== #
     NOVEL_CLASSES_SPLIT1 = (['vehicle']),
     NOVEL_CLASSES_SPLIT2 = ('airplane', 'windmill', 'baseballfield', 'tenniscourt', 'trainstation'),
     NOVEL_CLASSES_SPLIT3 = ('windmill', 'ship', 'trainstation'),    
 
-# ===================== #
+
     BASE_CLASSES_SPLIT1 = ('golffield', 'Expressway-toll-station', 'trainstation', 'chimney',
                             'storagetank', 'ship', 'harbor', 'airplane', 
                             'groundtrackfield', 'tenniscourt', 'dam', 'basketballcourt',
@@ -141,7 +140,7 @@ class FewShotDiorDataset(BaseFewShotDataset):
                  coordinate_offset: List[int] = [-1, -1, -1, -1],
                  fsod_enable = False,
                  difficulty = 100,
-                 fewshot_path = f'/home/archeval/FSOD_mmdet_clean/data/dior/',
+                 dior_folder = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
                  **kwargs) -> None:
         if dataset_name is None:
             self.dataset_name = 'Test dataset' \
@@ -153,6 +152,7 @@ class FewShotDiorDataset(BaseFewShotDataset):
         # the split_id would be set value in `self.get_classes`
         self.split_id = None
 
+        self.dior_folder_path = dior_folder
         assert classes is not None, f'{self.dataset_name}: classes in ' \
                                     f'`FewShotDiorDataset` can not be None.'
         
@@ -174,8 +174,6 @@ class FewShotDiorDataset(BaseFewShotDataset):
                 f'num_novel_shots/num_base_shots at the same time.'
         self.coordinate_offset = coordinate_offset
         self.use_difficult = use_difficult
-
-        self.fewshot_path = fewshot_path
         super().__init__(
             classes=None,
             ann_shot_filter=ann_shot_filter,
@@ -217,9 +215,8 @@ class FewShotDiorDataset(BaseFewShotDataset):
         if self.proposals is not None:
             results['proposals'] = self.proposals[idx]
         self.pre_pipeline(results)
-        
+
         to_return = self.pipeline(results)
-        
         return to_return
     
     def prepare_train_img_g(self,
@@ -392,7 +389,6 @@ class FewShotDiorDataset(BaseFewShotDataset):
             else:
                 raise ValueError('Cannot infer dataset year from img_prefix')
             if 'dior' in ann_file:
-
                 if 'val' in ann_file:
                     ann_info, width, height = self._get_xml_ann_info_dior_hbb(img_id, classes, True)
                 else:
@@ -429,10 +425,8 @@ class FewShotDiorDataset(BaseFewShotDataset):
         labels = []
         bboxes_ignore = []
         labels_ignore = []
-        xml_path = self.fewshot_path + f'Annotations/{img_id}.xml'
-        #xml_path = f'/home/archeval/FSOD_mmdet_clean/data/dior/Annotations/{img_id}.xml'
-        #xml_path = f'/home/archeval/mmdetection/CATNet/mmdetection/data/dior/Annotations/{img_id}.xml'
-        #xml_path = f'/data/dior/Annotations/{img_id}.xml'
+        xml_path = f'{self.dior_folder_path}/Annotations/{img_id}.xml'
+        
         tree = ET.parse(xml_path)
         root = tree.getroot()
         size = root.find('size')
@@ -707,20 +701,20 @@ class FewShotDiorDefaultDatasetNoDif(FewShotDiorDataset):
     """
 
     
-    def __init__(self, ann_cfg: List[Dict], **kwargs) -> None:
+    def __init__(self, dior_folder_path, ann_cfg: List[Dict], **kwargs) -> None:
         self.fsod = True
+        # dior_folder_path = /home/archeval/mmdetection/CATNet/mmdetection/data/dior
         
         self.dior_benchmark = {
         f'SPLIT{split}_{shot}SHOT': [
             dict(
                 type='ann_file',
-                ann_file= self.fewshot_path + f'few_shot_ann/hard_benchmark_{shot}shot/'
-                #ann_file=f'/home/archeval/mmdetection/CATNet/mmdetection/data/dior/few_shot_ann/hard_benchmark_{shot}shot/'
+                ann_file=f'{dior_folder_path}/few_shot_ann/hard_benchmark_{shot}shot/'
                 f'box_{shot}shot_{class_name}_train.txt',
                 ann_classes=[class_name])
             for class_name in DIOR_SPLIT[f'ALL_CLASSES_SPLIT{split}']
         ]
-        for shot in [1, 5, 10, 50, 100, 150, 200] for split in [1, 2, 3]
+        for shot in [1, 5, 10, 20, 50, 100, 150, 200] for split in [1, 2, 3]
         }
 
         # pre-defined annotation config for model reproducibility
@@ -825,20 +819,19 @@ class FewShotDiorDefaultDataset(FewShotDiorDataset):
     """
 
     
-    def __init__(self, ann_dif, ann_cfg: List[Dict], **kwargs) -> None:
+    def __init__(self, ann_dif, dior_folder_path, ann_cfg: List[Dict], **kwargs) -> None:
         self.fsod = True
         
         self.dior_benchmark = {
         f'SPLIT{split}_{shot}SHOT': [
             dict(
                 type='ann_file',
-                ann_file= self.fewshot_path + f'few_shot_ann/hard_benchmark_{shot}shot/'
-                #ann_file=f'/home/archeval/mmdetection/CATNet/mmdetection/data/dior/few_shot_ann/hard_benchmark_{shot}shot/'
+                ann_file=f'{dior_folder_path}/few_shot_ann/hard_benchmark_{shot}shot/'
                 f'box_{shot}shot_{class_name}_train.txt',
                 ann_classes=[class_name])
             for class_name in DIOR_SPLIT[f'ALL_CLASSES_SPLIT{split}']
         ]
-        for shot in [1, 5, 10, 50, 100, 150, 200] for split in [1, 2, 3]
+        for shot in [1, 5, 10, 20, 50, 100, 150, 200] for split in [1, 2, 3]
         }
 
         # pre-defined annotation config for model reproducibility

@@ -1,3 +1,4 @@
+
 # dataset settings
 dataset_type = 'ContrastiveFewShotDiorDataset'
 data_root = 'data/dior/'
@@ -20,13 +21,14 @@ train_pipeline_base = [
 train_pipeline_create_novel = [
     dict(type='AugScaled_nBBOX',
                 out_max = 15,
-                nbr_nBBOX = 2,
+                nbr_nBBOX = 5,
                 min_bbox_size = 5,
                 batch_size = batch_size, 
                 nbr_class = 20,
                 BBOX_scaling = 0.3
         )
 ]
+
 
 train_pipeline_augment =[
     dict(
@@ -65,8 +67,6 @@ train_pipeline_augment =[
 
 
 train_pipeline_finish = [
-    dict(type='Pad', size_divisor=64),
-    dict(type='Normalize', **img_norm_cfg),
 
     dict(type='ContrastiveDefaultFormatBundle'), 
 
@@ -105,10 +105,10 @@ data = dict(
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
         ann_cfg=[
             dict(
                 type='ann_file',
+                dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
                 ann_file=data_root + '/ImageSets/Main/train.txt')
             ],
         img_prefix=data_root + '/JPEGImages/',
@@ -117,10 +117,10 @@ data = dict(
         ),
     FTprep=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
         ann_cfg=[
             dict(
                 type='ann_file',
+                dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
                 ann_file=data_root + '/ImageSets/Main/train.txt')
             ],
         img_prefix=data_root + '/JPEGImages/',
@@ -129,10 +129,10 @@ data = dict(
         ),
     val=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
         ann_cfg=[
             dict(
                 type='ann_file',
+                dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
                 ann_file=data_root + '/ImageSets/Main/val.txt')
             ],
         img_prefix=data_root + '/JPEGImages/',
@@ -141,11 +141,11 @@ data = dict(
     
     test=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
         ann_cfg=[ 
             dict(
                 type='ann_file', 
-                ann_file=data_root + '/ImageSets/Main/val.txt')
+                dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+                ann_file=data_root + '/ImageSets/Main/test.txt')
             ],
         img_prefix=data_root + '/JPEGImages/',
         pipeline=test_pipeline,
