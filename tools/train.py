@@ -16,13 +16,12 @@ from mmcv.runner import HOOKS
 from mmdet import __version__
 
 from new_models import init_random_seed, set_random_seed, train_detector, build_dataset, build_detector
-#from .apis import init_random_seed, set_random_seed, train_detector
-#from .datasets import build_dataset
-#from .models import build_detector
+
+
 from mmdet.utils import (collect_env, get_device,
                          replace_cfg_vals, setup_multi_processes,
-                         update_data_root)
-from utils import get_root_logger
+                         update_data_root, get_root_logger)
+
 import sys
 
 def parse_args():

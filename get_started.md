@@ -40,3 +40,8 @@ pip install mmdet==2.25.3
 mamba install -c conda-forge timm
 pip install -U albumentations
 ```
+
+** Step 3.**
+```shell
+pip install yacs
+```

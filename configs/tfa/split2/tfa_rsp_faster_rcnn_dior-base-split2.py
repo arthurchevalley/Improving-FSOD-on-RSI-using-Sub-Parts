@@ -21,6 +21,8 @@ model = dict(
     roi_head=dict(
         bbox_head=dict(
             num_classes=15,
+            loss_cls=dict(
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
             loss_bbox=dict(type='SmoothL1Loss_analyse', beta=1.0, loss_weight=1.0),
         ),
     )

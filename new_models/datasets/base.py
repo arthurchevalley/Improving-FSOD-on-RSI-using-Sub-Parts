@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Sequence, Union
 
 import numpy as np
 
-from .pipelines import ComposeLocal
+from mmdet.datasets.pipelines import Compose
 from terminaltables import AsciiTable
 from mmdet.utils import get_root_logger
 from .builder import DATASETS
@@ -238,11 +238,11 @@ class BaseFewShotDataset(CustomDataset):
                 f'{self.dataset_name} : multi_pipelines is type of dict'
             self.multi_pipelines = {}
             for key in multi_pipelines.keys():
-                self.multi_pipelines[key] = ComposeLocal(multi_pipelines[key])
+                self.multi_pipelines[key] = Compose(multi_pipelines[key])
         elif pipeline is not None:
             assert isinstance(pipeline, list), \
                 f'{self.dataset_name} : pipeline is type of list'
-            self.pipeline = ComposeLocal(pipeline)
+            self.pipeline = Compose(pipeline)
         else:
             raise ValueError('missing pipeline or multi_pipelines')
         # show dataset annotation usage

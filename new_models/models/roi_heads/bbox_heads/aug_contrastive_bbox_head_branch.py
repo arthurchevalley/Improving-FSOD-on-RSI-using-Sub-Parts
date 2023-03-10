@@ -4,15 +4,16 @@ from typing import Dict, Optional, Tuple
 
 import torch
 import torch.nn as nn
+
 import torch.nn.functional as F
 from mmcv.runner import force_fp32
 from mmdet.models.builder import HEADS, build_loss
-from .convfc_bbox_head import Shared2FCBBoxHead
+from .convfc_bbox_head import Shared2FCBBoxHeadUpdate
 import numpy as np
 import pickle 
-
+from os.path import exists
 @HEADS.register_module()
-class AugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
+class AugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -41,7 +42,7 @@ class AugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
                  *args,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        # override the fc_cls in :obj:`Shared2FCBBoxHead`
+        # override the fc_cls in :obj:`Shared2FCBBoxHeadUpdate`
         if self.with_cls:
             self.fc_cls = nn.Linear(
                 self.cls_last_dim, self.num_classes + 1, bias=False)
@@ -345,7 +346,7 @@ class AugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
         return losses
 
 @HEADS.register_module()
-class QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
+class QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -386,7 +387,7 @@ class QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
                  *args,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        # override the fc_cls in :obj:`Shared2FCBBoxHead`
+        # override the fc_cls in :obj:`Shared2FCBBoxHeadUpdate`
         if self.with_cls:
             self.fc_cls = nn.Linear(
                 self.cls_last_dim, self.num_classes + 1, bias=False)
@@ -1790,7 +1791,7 @@ class QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
         return losses
 
 @HEADS.register_module()
-class QueueAugContrastiveBBoxHead_Branch_classqueue(Shared2FCBBoxHead):
+class QueueAugContrastiveBBoxHead_Branch_classqueue(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -1831,7 +1832,7 @@ class QueueAugContrastiveBBoxHead_Branch_classqueue(Shared2FCBBoxHead):
                  *args,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        # override the fc_cls in :obj:`Shared2FCBBoxHead`
+        # override the fc_cls in :obj:`Shared2FCBBoxHeadUpdate`
         if self.with_cls:
             self.fc_cls = nn.Linear(
                 self.cls_last_dim, self.num_classes + 1, bias=False)
@@ -3044,7 +3045,7 @@ class QueueAugContrastiveBBoxHead_Branch_classqueue(Shared2FCBBoxHead):
         return losses
    
 @HEADS.register_module()
-class QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBBoxHead):
+class QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -3085,7 +3086,7 @@ class QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBBoxHead):
                  *args,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        # override the fc_cls in :obj:`Shared2FCBBoxHead`
+        # override the fc_cls in :obj:`Shared2FCBBoxHeadUpdate`
         if self.with_cls:
             self.fc_cls = nn.Linear(
                 self.cls_last_dim, self.num_classes + 1, bias=False)
@@ -4467,7 +4468,7 @@ class QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBBoxHead):
         return losses
    
 @HEADS.register_module()
-class QueueAugContrastiveBBoxHead_Branch_classqueue_replace_withbg(Shared2FCBBoxHead):
+class QueueAugContrastiveBBoxHead_Branch_classqueue_replace_withbg(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -4508,7 +4509,7 @@ class QueueAugContrastiveBBoxHead_Branch_classqueue_replace_withbg(Shared2FCBBox
                  *args,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        # override the fc_cls in :obj:`Shared2FCBBoxHead`
+        # override the fc_cls in :obj:`Shared2FCBBoxHeadUpdate`
         if self.with_cls:
             self.fc_cls = nn.Linear(
                 self.cls_last_dim, self.num_classes + 1, bias=False)
@@ -5853,7 +5854,7 @@ class QueueAugContrastiveBBoxHead_Branch_classqueue_replace_withbg(Shared2FCBBox
    
 
 @HEADS.register_module()
-class Agnostic_BBoxHead_Branch(Shared2FCBBoxHead):
+class Agnostic_BBoxHead_Branch(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -5878,7 +5879,7 @@ class Agnostic_BBoxHead_Branch(Shared2FCBBoxHead):
                  *args,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        # override the fc_cls in :obj:`Shared2FCBBoxHead`
+        # override the fc_cls in :obj:`Shared2FCBBoxHeadUpdate`
         if self.with_cls:
             self.fc_cls = nn.Linear(
                 self.cls_last_dim, self.num_classes + 1, bias=False)
@@ -5962,7 +5963,7 @@ class Agnostic_BBoxHead_Branch(Shared2FCBBoxHead):
         self._decay_rate = decay_rate
 
 @HEADS.register_module()
-class Agnostic_QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
+class Agnostic_QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -6003,7 +6004,7 @@ class Agnostic_QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
                  *args,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        # override the fc_cls in :obj:`Shared2FCBBoxHead`
+        # override the fc_cls in :obj:`Shared2FCBBoxHeadUpdate`
         if self.with_cls:
             self.fc_cls = nn.Linear(
                 self.cls_last_dim, self.num_classes + 1, bias=False)
@@ -7373,7 +7374,7 @@ class Agnostic_QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHead):
         return losses
 
 @HEADS.register_module()
-class Agnostic_QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBBoxHead):
+class Agnostic_QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -7414,7 +7415,7 @@ class Agnostic_QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBB
                  *args,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        # override the fc_cls in :obj:`Shared2FCBBoxHead`
+        # override the fc_cls in :obj:`Shared2FCBBoxHeadUpdate`
         if self.with_cls:
             self.fc_cls = nn.Linear(
                 self.cls_last_dim, self.num_classes + 1, bias=False)
@@ -8860,7 +8861,7 @@ class Agnostic_QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBB
         return losses
  
 @HEADS.register_module()
-class Agnostic_QueueAugContrastiveBBoxHead_Branch_classqueue_replace_withbg(Shared2FCBBoxHead):
+class Agnostic_QueueAugContrastiveBBoxHead_Branch_classqueue_replace_withbg(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
     Args:
@@ -8901,7 +8902,7 @@ class Agnostic_QueueAugContrastiveBBoxHead_Branch_classqueue_replace_withbg(Shar
                  *args,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        # override the fc_cls in :obj:`Shared2FCBBoxHead`
+        # override the fc_cls in :obj:`Shared2FCBBoxHeadUpdate`
         if self.with_cls:
             self.fc_cls = nn.Linear(
                 self.cls_last_dim, self.num_classes + 1, bias=False)

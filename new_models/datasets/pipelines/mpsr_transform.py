@@ -6,10 +6,10 @@ from typing import Dict, List, Tuple
 import mmcv
 import numpy as np
 from ..builder import PIPELINES
-from .transforms import (Normalize, Pad, RandomCrop, RandomFlip, Resize)
+from mmdet.datasets.pipelines.transforms import (Normalize, Pad, RandomCrop, RandomFlip, Resize)
 
 from mmcv.parallel import DataContainer as DC
-from .formatting import Collect, DefaultFormatBundle
+from mmdet.datasets.pipelines.formatting import Collect, DefaultFormatBundle
 
 
 @PIPELINES.register_module()

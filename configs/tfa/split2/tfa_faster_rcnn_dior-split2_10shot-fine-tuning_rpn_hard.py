@@ -27,7 +27,7 @@ lr_config = dict(
     warmup=None,
     step=[2000])
 runner = dict(type='IterBasedRunner', max_iters=6000)
-checkpoint_config = dict(interval=5999)
+checkpoint_config = dict(interval=6000)
 
 # base model needs to be initialized with following script:
 #   python -m tools.misc.initialize_bbox_head --src1 work_dirs/tfa_rsp_faster_rcnn_dior-base-split2/latest.pth --method random_init --save-dir work_dirs/tfa_rsp_faster_rcnn_dior-base-split2 --dior
