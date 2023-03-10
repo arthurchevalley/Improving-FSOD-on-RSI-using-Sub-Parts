@@ -14,9 +14,11 @@ from mmcv.runner import get_dist_info, init_dist
 from mmcv.utils import get_git_hash
 from mmcv.runner import HOOKS
 from mmdet import __version__
-from apis import init_random_seed, set_random_seed, train_detector
-from datasets import build_dataset
-from models import build_detector
+
+from new_models import init_random_seed, set_random_seed, train_detector, build_dataset, build_detector
+#from .apis import init_random_seed, set_random_seed, train_detector
+#from .datasets import build_dataset
+#from .models import build_detector
 from mmdet.utils import (collect_env, get_device,
                          replace_cfg_vals, setup_multi_processes,
                          update_data_root)

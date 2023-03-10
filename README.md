@@ -1,6 +1,6 @@
 ## Introduction
 
-Few-shpt object detection on remote sensing images for DIOR horizontal bounding boxes.
+Few-shot object detection on remote sensing images for DIOR horizontal bounding boxes.
 Based on MMDetection object detection toolbox based on PyTorch which is
 a part of the [OpenMMLab](https://openmmlab.com/) project.
 
