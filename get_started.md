@@ -41,7 +41,11 @@ mamba install -c conda-forge timm
 pip install -U albumentations
 ```
 
-** Step 3.**
+**Step 3.**
 ```shell
 pip install yacs
+```
+**Step 4.** Install the new models, pipeline,.. as a package
+```shell
+bash setup_new_models.sh
 ```
