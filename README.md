@@ -19,6 +19,15 @@ Please refer to [Installation](get_started.md/#Installation) for installation in
 
 Please see [get_started.md](get_started.md) for the basic usage of this repo. 
 
+## Adding CometML hook
+In the setup file, configs/tfa/../...py add:
+log_config = dict(
+  interval=50,
+  hooks=[
+      dict(type='CometMLLoggerHook', 
+          project_name='logger_comet_ml',
+          api_key= ‘your-api-key’)
+  ])
 ## Contributing
 
 We appreciate all contributions to improve MMDetection. Ongoing projects can be found in out [GitHub Projects](https://github.com/open-mmlab/mmdetection/projects). Welcome community users to participate in these projects. Please refer to [CONTRIBUTING.md](.github/CONTRIBUTING.md) for the contributing guideline.

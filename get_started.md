@@ -50,3 +50,8 @@ mamba install -c conda-forge numpy=1.23.4
 ```shell
 bash setup_new_models.sh
 ```
+
+**Optional** Install cometML to monitor trainings etc
+```shell
+pip install comet-ml
+```
