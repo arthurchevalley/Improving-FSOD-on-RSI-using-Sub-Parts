@@ -15,7 +15,7 @@ The master branch works with **PyTorch 1.5+**.
 
 Please refer to [Installation](get_started.md) for installation instructions.
 
-## Getting Started
+## Running Models
 
 Please see [running_models.md](running_models.md) for the basic explanation on how to run training, fine-tuning, etc
 

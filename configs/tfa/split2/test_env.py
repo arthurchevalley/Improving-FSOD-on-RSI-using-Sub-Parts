@@ -72,9 +72,9 @@ log_config = dict(
     interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
-        #dict(type='CometMLLoggerHook', 
-        #    project_name='logger_comet_ml',
-         #   api_key= 'personal-key-to-replace')
+        dict(type='CometMLLoggerHook', 
+            project_name='logger_comet_ml',
+            api_key= 'personal-key-to-replace')
     ])
 data = dict(
     train=dict(classes='BASE_CLASSES_SPLIT2'),

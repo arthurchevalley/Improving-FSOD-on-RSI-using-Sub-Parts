@@ -131,6 +131,13 @@ python -m tools.misc.initialize_bbox_head --src1 base_training_weight --method i
 ```
 Where _base_training_weight_ is the path to the base training weight, _init_method_ is how to initialise the classification weights, e.g. tests have been conducted with random_init, the new weights will be saved in folder _saving_folder_of_new_weights_ with the name starting with _prefix_saving_name_ and followed by _random_init_bbox_head.pth_ if random_init has been chosen. The last option --dior is needed to specify the dataset used.
 
+If one want to load a queue from base training in fine-tuning, the queue must be initiliased. This is achieved by running:
+```shell
+python -m tools.misc.initialize_pretrain --src1 base_training_weight --save_dir saving_folder --queue class/random --nobg --base_withbg
+```
+Where _base_training_weight_ is the path to the base training weight, 'saving_folder' is the folder to save the queue features, 'queue' defines if the desired queue is a queue per class or random queue. Finally, if '--nobg' is added, the queue will not include background whereas not adding it provides a queue with background. 'nbr_base_class' and 'nbr_ft_class' can be added to specify the number of classes. By default, it is defined to match DIOR dataset with 15 base classes and 20 classes in total for fine-tuning. Finally, 'target_queue_length' can be added to specify the deisred queue length, by default 126. If the base queue is too small, the extra elements are initialised to None.
+
+
 Finally, to load those newly changed weights, they must be loaded using the following command:
 ```shell
 load_from = ('work_dirs/base_contrastive_perclass_1_bbox_model_split2_random_init_bbox_head.pth')
