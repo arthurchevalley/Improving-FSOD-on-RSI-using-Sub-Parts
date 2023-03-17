@@ -20,6 +20,7 @@ The first line defines the general model to use and the second the dataset pipel
 Note that all of those are initialising the model but can be overloaded by the code following. It allows to have the similar base model and  specific parameters changes.
 
 **Overwritting model settings**
+
 To change specific component of the model, the desired parameter are set after. In this exemple, a pre-trained backbone is loaded from a weight file. Then the RPN head loss and the RoI head are changed. All 'type' parameters are defined in the 'new_models' folder.
 ```shell
 model = dict(
@@ -77,6 +78,7 @@ model = dict(
 )
 ```
 **Overwritting training settings**
+
 Custom hook, such a the decrease of regression weight during training, can be defined here. 
 ```shell
 custom_hooks = [
@@ -107,4 +109,29 @@ log_config = dict(
             project_name='logger_comet_ml',
             api_key= 'personal-key-to-replace')
     ])
+```
+# Few-shot fine-tuning
+
+For the few-shot fine-tuning, the few-shot dataset, number of shots and split must be defined. This is achieved by defining the data such as:
+```shell
+data = dict(
+    train=dict(
+        type='ContrastiveFewShotDiorDefaultDataset',
+        ann_dif='hard',
+        ann_cfg=[dict(method='TFA', setting='SPLIT2_10SHOT')],
+        num_novel_shots=10,
+        num_base_shots=1,
+        classes='ALL_CLASSES_SPLIT2'),
+    val=dict(classes='ALL_CLASSES_SPLIT2'),
+    test=dict(classes='ALL_CLASSES_SPLIT2'))
+```
+In additon, the fully-connected layers must be changed to match the number of classes. This is achieved by using initialize_bbox_head.py
+```shell
+python -m tools.misc.initialize_bbox_head --src1 base_training_weight --method init_method --tar-name prefix_saving_name --save-dir saving_folder_of_new_weights --dior
+```
+Where _base_training_weight_ is the path to the base training weight, _init_method_ is how to initialise the classification weights, e.g. tests have been conducted with random_init, the new weights will be saved in folder _saving_folder_of_new_weights_ with the name starting with _prefix_saving_name_ and followed by _random_init_bbox_head.pth_ if random_init has been chosen. The last option --dior is needed to specify the dataset used.
+
+Finally, to load those newly changed weights, they must be loaded using the following command:
+```shell
+load_from = ('work_dirs/base_contrastive_perclass_1_bbox_model_split2_random_init_bbox_head.pth')
 ```

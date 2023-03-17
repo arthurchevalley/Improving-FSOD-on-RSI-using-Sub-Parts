@@ -21,6 +21,8 @@ Please see [running_models.md](running_models.md) for the basic explanation on h
 
 ## Adding CometML hook
 In the setup file, configs/tfa/../...py add:
+
+```shell
 log_config = dict(
   interval=50,
   hooks=[
@@ -28,6 +30,7 @@ log_config = dict(
           project_name='logger_comet_ml',
           api_key= ‘your-api-key’)
   ])
+```
 ## Contributing
 
 We appreciate all contributions to improve MMDetection. Ongoing projects can be found in out [GitHub Projects](https://github.com/open-mmlab/mmdetection/projects). Welcome community users to participate in these projects. Please refer to [CONTRIBUTING.md](.github/CONTRIBUTING.md) for the contributing guideline.
