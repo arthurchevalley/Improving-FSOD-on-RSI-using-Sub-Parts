@@ -55,6 +55,7 @@ model = dict(
 data = dict(
     train=dict(
         type='ContrastiveFewShotDiorDefaultDataset',
+        dior_folder_path='/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
         ann_dif='hard',
         ann_cfg=[dict(method='TFA', setting='SPLIT2_10SHOT')],
         num_novel_shots=10,
@@ -79,4 +80,4 @@ checkpoint_config = dict(interval=2300)
 # please refer to configs/detection/tfa/README.md for more details.
 
 
-load_from = ('work_dirs/contrastive_agnostic_model_split2_random_init_bbox_head.pth')
+load_from = ('work_dirs/FINAL_WEIGHTS/contrastive_agnostic_model_split2_random_init_bbox_head.pth')

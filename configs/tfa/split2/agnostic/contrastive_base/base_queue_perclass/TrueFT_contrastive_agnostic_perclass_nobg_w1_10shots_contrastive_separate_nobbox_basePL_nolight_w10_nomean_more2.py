@@ -80,4 +80,4 @@ checkpoint_config = dict(interval=3000)
 # please refer to configs/detection/tfa/README.md for more details.
 
 
-load_from = ('work_dirs/contrastive_agnostic_perclass_nobg_w1_model_split2_random_init_bbox_head.pth')
+load_from = ('work_dirs/FINAL_WEIGHTS/contrastive_agnostic_perclass_nobg_w1_model_split2_random_init_bbox_head.pth')
