@@ -5,8 +5,7 @@ _base_ = [
     '../../_base_/default_runtime.py'
 ]
 
-# classes splits are predefined in FewShotVOCDataset
-# FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
+
 
 # model settings
 
@@ -53,7 +52,7 @@ model = dict(
                 no_bg = True),
             loss_c_bbox=None,
             to_norm_cls = True,
-            queue_path = 'base_features.p',
+            queue_path = None,
             use_queue = True,
             use_base_queue = True,
             use_novel_queue = True,
@@ -79,14 +78,7 @@ evaluation = dict(
     interval=4,
     metric='mAP',
     class_splits=['BASE_CLASSES_SPLIT2'])
-log_config = dict(
-    interval=50,
-    hooks=[
-        dict(type='TextLoggerHook'),
-        dict(type='CometMLLoggerHook', 
-            project_name='logger_comet_ml',
-            api_key= 'UavGjAWatUgY4kp6T3tv3VWuS')
-    ])
+
 optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
 auto_scale_lr = dict(enable=False, base_batch_size=2)
 checkpoint_config = dict(interval=11)

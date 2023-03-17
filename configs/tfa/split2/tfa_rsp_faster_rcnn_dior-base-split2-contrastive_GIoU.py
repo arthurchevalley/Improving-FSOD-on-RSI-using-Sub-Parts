@@ -5,8 +5,7 @@ _base_ = [
     '../../_base_/default_runtime.py'
 ]
 
-# classes splits are predefined in FewShotVOCDataset
-# FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
+
 
 # model settings
 
@@ -53,7 +52,7 @@ model = dict(
                 no_bg = True),
             loss_c_bbox=dict(type='IoULossBBOX', loss_weight=0.5),
             to_norm_cls = True,
-            queue_path = 'init_queue_features.p',
+            queue_path = None,
             use_queue = True,
             use_base_queue = True,
             use_novel_queue = True,

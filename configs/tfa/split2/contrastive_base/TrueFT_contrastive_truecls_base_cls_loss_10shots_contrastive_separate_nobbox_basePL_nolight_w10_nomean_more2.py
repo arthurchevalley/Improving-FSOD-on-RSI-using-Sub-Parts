@@ -6,8 +6,7 @@ _base_ = [
 ]
 
 
-# classes splits are predefined in FewShotVOCDataset
-# FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
+
 
 
 model = dict(

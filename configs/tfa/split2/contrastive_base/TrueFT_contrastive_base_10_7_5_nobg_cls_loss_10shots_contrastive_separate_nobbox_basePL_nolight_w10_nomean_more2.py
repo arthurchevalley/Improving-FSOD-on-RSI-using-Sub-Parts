@@ -5,8 +5,7 @@ _base_ = [
     '../../../_base_/default_shot_runtime.py'
 ]
 
-# classes splits are predefined in FewShotVOCDataset
-# FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
+
 
 
 model = dict(
@@ -18,7 +17,7 @@ model = dict(
         bbox_head=dict(
             type='QueueAugContrastiveBBoxHead_Branch_classqueue_replace',
             num_classes=20,
-            loss_bbox=dict(type='SmoothL1Loss_analyse', beta=1.0, loss_weight=10.0),
+            loss_bbox=dict(type='SmoothL1Loss_analyse', beta=1.0, loss_weight=1.0),
             loss_cosine=dict(
                 type='QueueDualSupervisedContrastiveLoss_class',
                 temperature=0.2,
@@ -47,7 +46,7 @@ model = dict(
             use_base_queue = True,
             use_novel_queue = True,
             use_aug_queue = True,
-            queue_length = 120
+            queue_length = 126
         )
     )
 )
@@ -76,9 +75,9 @@ runner = dict(type='IterBasedRunner', max_iters=3000)
 checkpoint_config = dict(interval=3000)
 
 
-# base model needs to be initialized with following script:
-# python -m tools.misc.initialize_bbox_head --src1 work_dirs/tfa_rsp_faster_rcnn_dior-base-split2-contrastive_trueclasses_bbox_changing_w_nobg/latest.pth --method random_init --tar-name base_model_10_7_5_nobg_split2 --save-dir work_dirs --dior
+# base model needs to be initialized with following script: 
+# python -m tools.misc.initialize_bbox_head --src1 work_dirs/tfa_rsp_faster_rcnn_dior-base-split2-contrastive_trueclasses_perclass_notlight_changingw_nobg/latest.pth --method random_init --tar-name contrastive_base_changingw_nobg_model_split2 --save-dir work_dirs --dior
 # please refer to configs/detection/tfa/README.md for more details.
 
 
-load_from = ('work_dirs/base_model_10_7_5_nobg_split2_random_init_bbox_head.pth')
+load_from = ('work_dirs/contrastive_base_changingw_nobg_model_split2_random_init_bbox_head.pth')

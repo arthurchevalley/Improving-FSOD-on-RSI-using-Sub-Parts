@@ -5,8 +5,7 @@ _base_ = [
     '../../../../_base_/default_shot_runtime.py'
 ]
 
-# classes splits are predefined in FewShotVOCDataset
-# FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
+
 
 
 model = dict(
@@ -40,9 +39,9 @@ model = dict(
                 loss_weight=0.5,
                 reweight_type='none',
                 no_bg = True),
-            loss_c_bbox=None,#dict(type='UPIoULossBBOX', loss_weight=.5),
+            loss_c_bbox=None,
             to_norm_cls = True,
-            queue_path = None,#'per_class_features.p',#res.p',
+            queue_path = None,
             use_queue = True,
             use_base_queue = True,
             use_novel_queue = True,
@@ -73,14 +72,7 @@ lr_config = dict(
     step=[2000, 2500])
 runner = dict(type='IterBasedRunner', max_iters=3000)
 checkpoint_config = dict(interval=3000)
-log_config = dict(
-    interval=50,
-    hooks=[
-        dict(type='TextLoggerHook'),
-        dict(type='CometMLLoggerHook', 
-            project_name='logger_comet_ml',
-           api_key= 'UavGjAWatUgY4kp6T3tv3VWuS')
-    ])
+
 # base model needs to be initialized with following script:
 # python -m tools.misc.initialize_bbox_head --src1 work_dirs/tfa_rsp_faster_rcnn_dior-base-split2-contrastive_trueclasses_bbox_agnostic_samew_high_nobg/latest.pth --method random_init --tar-name contrastive_agnostic_nobg_samew_high_model_split2 --save-dir work_dirs --dior
 # please refer to configs/detection/tfa/README.md for more details.

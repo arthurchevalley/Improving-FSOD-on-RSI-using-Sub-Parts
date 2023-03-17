@@ -3,10 +3,7 @@
 log_config = dict(
     interval=50,
     hooks=[
-        dict(type='TextLoggerHook'),
-        dict(type='CometMLLoggerHook', 
-            project_name='test',
-            api_key= 'UavGjAWatUgY4kp6T3tv3VWuS')
+        dict(type='TextLoggerHook')
     ])
 # yapf:enable
 custom_hooks = [dict(type='NumClassCheckHook')]

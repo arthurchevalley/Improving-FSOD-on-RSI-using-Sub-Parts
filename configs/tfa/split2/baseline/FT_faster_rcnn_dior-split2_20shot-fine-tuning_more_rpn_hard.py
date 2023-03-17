@@ -5,8 +5,7 @@ _base_ = [
     '../../../_base_/default_shot_runtime.py'
 ]
 
-# classes splits are predefined in FewShotVOCDataset
-# FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
+
 
 
 model = dict(
@@ -32,8 +31,7 @@ model = dict(
 )
 
 
-# classes splits are predefined in FewShotVOCDataset
-# FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
+
 data = dict(
     train=dict(
         type='FewShotDiorDefaultDataset',
