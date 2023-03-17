@@ -13,11 +13,11 @@ The master branch works with **PyTorch 1.5+**.
 
 ## Installation
 
-Please refer to [Installation](get_started.md/#Installation) for installation instructions.
+Please refer to [Installation](get_started.md) for installation instructions.
 
 ## Getting Started
 
-Please see [get_started.md](get_started.md) for the basic usage of this repo. 
+Please see [running_models.md](running_models.md) for the basic explanation on how to run training, fine-tuning, etc
 
 ## Adding CometML hook
 In the setup file, configs/tfa/../...py add:
