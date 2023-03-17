@@ -64,7 +64,7 @@ data = dict(
     val=dict(classes='ALL_CLASSES_SPLIT2'),
     test=dict(classes='ALL_CLASSES_SPLIT2'))
 evaluation = dict(
-    interval=1500,
+    interval=51,
     metric='mAP',
     class_splits=['BASE_CLASSES_SPLIT2', 'NOVEL_CLASSES_SPLIT2'])
 optimizer = dict(lr=0.001)

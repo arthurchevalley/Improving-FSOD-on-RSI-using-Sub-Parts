@@ -21,14 +21,13 @@ train_pipeline_base = [
 train_pipeline_create_novel = [
     dict(type='AugScaled_nBBOX',
                 out_max = 15,
-                nbr_nBBOX = 5,
+                nbr_nBBOX = 2,
                 min_bbox_size = 5,
                 batch_size = batch_size, 
                 nbr_class = 20,
                 BBOX_scaling = 0.3
         )
 ]
-
 
 train_pipeline_augment =[
     dict(
@@ -67,6 +66,8 @@ train_pipeline_augment =[
 
 
 train_pipeline_finish = [
+    dict(type='Pad', size_divisor=64),
+    dict(type='Normalize', **img_norm_cfg),
 
     dict(type='ContrastiveDefaultFormatBundle'), 
 
@@ -141,7 +142,7 @@ data = dict(
         ann_cfg=[ 
             dict(
                 type='ann_file', 
-                ann_file=data_root + '/ImageSets/Main/test.txt')
+                ann_file=data_root + '/ImageSets/Main/val.txt')
             ],
         img_prefix=data_root + '/JPEGImages/',
         pipeline=test_pipeline,

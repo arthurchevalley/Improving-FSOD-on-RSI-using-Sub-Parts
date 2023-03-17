@@ -50,15 +50,15 @@ train_pipeline_augment =[
         flip_ratio=.5,
         direction='diagonal'),
     dict(
-        type='ContrastiveColorTransform',
+        type='ColorTransform',
         level = 10.,
         prob=.5),
     dict(
-        type='ContrastiveContrastTransform',
+        type='ContrastTransform',
         level = 10.,
         prob=.5),
     dict(
-        type='ContrastiveBrightnessTransform',
+        type='BrightnessTransform',
         level = 10.,
         prob=.5)
     
@@ -109,7 +109,6 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
                 ann_file=data_root + '/ImageSets/Main/train.txt')
             ],
         img_prefix=data_root + '/JPEGImages/',
@@ -121,7 +120,6 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
                 ann_file=data_root + '/ImageSets/Main/train.txt')
             ],
         img_prefix=data_root + '/JPEGImages/',
@@ -133,7 +131,6 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
                 ann_file=data_root + '/ImageSets/Main/val.txt')
             ],
         img_prefix=data_root + '/JPEGImages/',
@@ -145,7 +142,6 @@ data = dict(
         ann_cfg=[ 
             dict(
                 type='ann_file', 
-                dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
                 ann_file=data_root + '/ImageSets/Main/test.txt')
             ],
         img_prefix=data_root + '/JPEGImages/',

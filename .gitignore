@@ -118,6 +118,7 @@ plots/
 docs/
 
 work_dirs/
+work_dirs2/
 
 # Pytorch
 *.pth

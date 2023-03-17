@@ -29,7 +29,6 @@ train_pipeline_create_novel = [
         )
 ]
 
-
 train_pipeline_augment =[
     dict(
         type='MultiRandomFlip',
@@ -67,6 +66,8 @@ train_pipeline_augment =[
 
 
 train_pipeline_finish = [
+    dict(type='Pad', size_divisor=64),
+    dict(type='Normalize', **img_norm_cfg),
 
     dict(type='ContrastiveDefaultFormatBundle'), 
 
@@ -141,7 +142,7 @@ data = dict(
         ann_cfg=[ 
             dict(
                 type='ann_file', 
-                ann_file=data_root + '/ImageSets/Main/test.txt')
+                ann_file=data_root + '/ImageSets/Main/val.txt')
             ],
         img_prefix=data_root + '/JPEGImages/',
         pipeline=test_pipeline,
