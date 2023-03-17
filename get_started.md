@@ -41,9 +41,10 @@ mamba install -c conda-forge timm
 pip install -U albumentations
 ```
 
-**Step 3.**
+**Step 3.** Multiple packages are needed and can be installed with
 ```shell
 pip install yacs
+mamba install -c conda-forge numpy=1.23.4
 ```
 **Step 4.** Install the new models, pipeline,.. as a package
 ```shell

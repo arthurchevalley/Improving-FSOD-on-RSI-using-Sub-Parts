@@ -27,21 +27,14 @@ model = dict(
         ),
     )
 )
-log_config = dict(
-    interval=50,
-    hooks=[
-        dict(type='TextLoggerHook'),
-       # dict(type='CometMLLoggerHook', 
-        #    project_name='logger_comet_ml',
-         #   api_key= 'UavGjAWatUgY4kp6T3tv3VWuS')
-    ])
+
 
 data = dict(
     train=dict(classes='BASE_CLASSES_SPLIT2'),
     val=dict(classes='BASE_CLASSES_SPLIT2'),
     test=dict(classes='BASE_CLASSES_SPLIT2'))
 evaluation = dict(
-    interval=1,
+    interval=10,
     metric='mIoU',
     class_splits=['BASE_CLASSES_SPLIT2'])
 

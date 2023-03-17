@@ -1,18 +1,14 @@
 _base_ = [
     '../../../_base_/datasets/tfa_dior.py',
     '../../../_base_/schedules/schedule_1x_iter.py',
-    '../../tfa_r50_unfreeze_fpn.py',
+    '../../tfa_r50_unfreeze_only_fpn.py',
     '../../../_base_/default_shot_runtime.py'
 ]
 
 # classes splits are predefined in FewShotVOCDataset
 # FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
 
-model = dict(
-    frozen_parameters=[
-        'backbone',
-        'rpn_head'
-    ])
+
 data = dict(
     train=dict(
         type='FewShotDiorDefaultDataset',

@@ -5,10 +5,7 @@ model = dict(
     
     frozen_parameters=[
         'backbone', 
-        'neck',
-        #'rpn_head', 
-        #'roi_head.bbox_head.shared_fcs', 
-        #'roi_head.bbox_head.fc_cls.bias'
+        'neck'
     ],
     
     roi_head=dict(

@@ -632,7 +632,6 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
             mean_aps = []
             for iou_thr in iou_thrs:
                 print_log(f'\n{"-" * 15}iou_thr: {iou_thr}{"-" * 15}')
-                print(self.CLASSES)
                 mean_ap, ap_results = eval_map(
                     results,
                     annotations,

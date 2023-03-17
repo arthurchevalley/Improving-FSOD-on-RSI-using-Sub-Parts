@@ -1,8 +1,8 @@
 _base_ = [
     '../../_base_/models/contrastive_r50_noRoI.py',
     '../../_base_/datasets/testing_norm_optimize_multi_rotate_base_s2.py',
-    '../../_base_/schedules/schedule_1x.py',
-    '../../_base_/default_runtime.py'
+    '../../_base_/schedules/schedule_1x_iter.py',
+    '../../_base_/default_shot_runtime.py'
 ]
 
 # classes splits are predefined in FewShotVOCDataset
@@ -64,14 +64,14 @@ model = dict(
     )
 )
 
-custom_hooks = [
-    dict(
-        type='BBOX_WEIGHT_CHANGE',
-            change_weight_epoch_bbox=6, 
-            increase_ratio_bbox = .3, 
-            number_of_epoch_step_bbox = 3
-    )
-]
+#custom_hooks = [
+ #    dict(
+  #      type='BBOX_WEIGHT_CHANGE',
+   #         change_weight_epoch_bbox=6, 
+    #        increase_ratio_bbox = .3, 
+     #       number_of_epoch_step_bbox = 3
+    #)
+#]
 log_config = dict(
     interval=50,
     hooks=[
@@ -84,11 +84,8 @@ data = dict(
     train=dict(classes='BASE_CLASSES_SPLIT2'),
     val=dict(classes='BASE_CLASSES_SPLIT2'),
     test=dict(classes='BASE_CLASSES_SPLIT2'))
-evaluation = dict(
-    interval=4,
-    metric='mAP',
-    class_splits=['BASE_CLASSES_SPLIT2'])
 
-optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
+
+#optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
 auto_scale_lr = dict(enable=False, base_batch_size=2)
-checkpoint_config = dict(interval=11)
+#checkpoint_config = dict(interval=110000)
