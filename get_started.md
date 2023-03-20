@@ -55,3 +55,9 @@ bash setup_new_models.sh
 ```shell
 pip install comet-ml
 ```
+
+**Pretrained Backbone**
+The models are using a millionAID pre-trained backbone. The weights are downloaded from [this repo](https://github.com/ViTAE-Transformer/ViTAE-Transformer-Remote-Sensing). An extra processing step is needed to match the weight names.
+```shell
+rsp-resnet-50-ckpt_ready.pth
+```
