@@ -1,6 +1,6 @@
 # dataset settings
 dataset_type = 'ContrastiveFewShotDiorDataset'
-data_root = 'data/dior/'
+data_root = '/home/data/dior/'
 batch_size = 1
 
 img_norm_cfg = dict(
@@ -105,7 +105,7 @@ data = dict(
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+        dior_folder_path = data_root,
         ann_cfg=[
             dict(
                 type='ann_file',
@@ -117,7 +117,7 @@ data = dict(
         ),
     FTprep=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+        dior_folder_path = data_root,
         ann_cfg=[
             dict(
                 type='ann_file',
@@ -129,7 +129,7 @@ data = dict(
         ),
     val=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+        dior_folder_path = data_root,
         ann_cfg=[
             dict(
                 type='ann_file',
@@ -141,7 +141,7 @@ data = dict(
     
     test=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+        dior_folder_path = data_root,
         ann_cfg=[ 
             dict(
                 type='ann_file', 

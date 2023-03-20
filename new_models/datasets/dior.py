@@ -140,7 +140,7 @@ class FewShotDiorDataset(BaseFewShotDataset):
                  coordinate_offset: List[int] = [-1, -1, -1, -1],
                  fsod_enable = False,
                  difficulty = 100,
-                 dior_folder = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+                 dior_folder_path = '/home/data/dior',
                  **kwargs) -> None:
         if dataset_name is None:
             self.dataset_name = 'Test dataset' \
@@ -152,7 +152,7 @@ class FewShotDiorDataset(BaseFewShotDataset):
         # the split_id would be set value in `self.get_classes`
         self.split_id = None
 
-        self.dior_folder_path = dior_folder
+        self.dior_folder_path = dior_folder_path
         assert classes is not None, f'{self.dataset_name}: classes in ' \
                                     f'`FewShotDiorDataset` can not be None.'
         
@@ -703,7 +703,6 @@ class FewShotDiorDefaultDatasetNoDif(FewShotDiorDataset):
     
     def __init__(self, dior_folder_path, ann_cfg: List[Dict], **kwargs) -> None:
         self.fsod = True
-        # dior_folder_path = /home/archeval/mmdetection/CATNet/mmdetection/data/dior
         
         self.dior_benchmark = {
         f'SPLIT{split}_{shot}SHOT': [

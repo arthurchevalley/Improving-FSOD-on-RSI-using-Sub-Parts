@@ -8,8 +8,8 @@ from .utils import *
 from .voc import VOCDataset, VOCDatasetPNG
 
 from .xml_style import XMLDataset, XMLDatasetPNG
-from .dota import FewShotDotaDatasetHBB
+
 from .dior import DIORDataset, FewShotDiorDataset, FewShotDiorDefaultDataset
-from .dota_clean import DotaDatasetHBB
+
 from .dior_contrastive import *
 

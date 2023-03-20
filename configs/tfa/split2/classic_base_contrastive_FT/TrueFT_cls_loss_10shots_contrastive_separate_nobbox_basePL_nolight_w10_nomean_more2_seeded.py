@@ -78,10 +78,7 @@ checkpoint_config = dict(interval=3000)
 log_config = dict(
     interval=50,
     hooks=[
-        dict(type='TextLoggerHook'),
-        #dict(type='CometMLLoggerHook', 
-        #    project_name='logger_comet_ml',
-        #    api_key= 'UavGjAWatUgY4kp6T3tv3VWuS')
+        dict(type='TextLoggerHook')
     ])
 # base model needs to be initialized with following script:
 # python -m tools.initialize_bbox_head --src1 work_dirs/tfa_rsp_faster_rcnn_dior-base-split2/latest.pth --method random_init --tar-name base_model_split2 --save-dir work_dirs --dior

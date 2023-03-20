@@ -128,7 +128,7 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
                  test_mode: bool = False,
                  coordinate_offset: List[int] = [-1, -1, -1, -1],
                  fsod_enable = False,
-                 dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+                 dior_folder_path = '/home/data/dior',
                  difficulty = 100,
                  **kwargs) -> None:
         if dataset_name is None:
@@ -151,6 +151,7 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
         self.CLASSES = self.get_classes(classes)
 
         self.dior_folder_path = dior_folder_path
+        
         # `ann_shot_filter` will be used to filter out excess annotations
         # for few shot setting. It can be configured manually or generated
         # by the `num_novel_shots` and `num_base_shots`
@@ -200,7 +201,6 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
 
         img_info = self.data_infos[idx]
         #
-        #print(img_info['filename'])
         id = img_info['filename']
         ann_info = self.get_ann_info(idx)
         results_base = dict(img_info=img_info, ann_info=ann_info)
@@ -208,7 +208,6 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
             results_base['proposals'] = self.proposals[idx]
 
         self.pre_pipeline(results_base)
-        #print(results['ann_info']['bboxes'])
 
         if self.multi_pipelines is not None:
             # normal novel aug finish
@@ -234,9 +233,6 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
 
         else:
             to_return = self.pipeline(results)
-        #if to_return['gt_bboxes'] is not None:
-        #        print(f'nan before for image {id}')
-        ##    if torch.isnan(to_return['gt_bboxes']._data).any():
         
         return to_return
 
@@ -467,6 +463,7 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
         labels = []
         bboxes_ignore = []
         labels_ignore = []
+        
         xml_path = f'{self.dior_folder_path}/Annotations/{img_id}.xml'
         tree = ET.parse(xml_path)
         root = tree.getroot()
@@ -507,7 +504,6 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
                 ymax
             ]
 
-            #print(bbox_info)
             ignore = False
             if self.min_bbox_area:
                 assert not self.test_mode
@@ -516,7 +512,6 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
                 if (w*h) < self.min_bbox_area:
                     ignore = True
             if difficult or ignore:
-                #print('in ignore')
                 bboxes_ignore.append(bbox_info)
                 labels_ignore.append(label)
             else:
