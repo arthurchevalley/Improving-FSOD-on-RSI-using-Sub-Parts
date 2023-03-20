@@ -76,7 +76,7 @@ runner = dict(type='IterBasedRunner', max_iters=3000)
 checkpoint_config = dict(interval=3000)
 
 # base model needs to be initialized with following script:
-# python -m tools.misc.initialize_bbox_head --src1 work_dirs/tfa_rsp_faster_rcnn_dior-base-split2-contrastive_trueclasses_bbox_agnostic_withbginqueue/latest.pth --method random_init --tar-name contrastive_agnostic_bginqueue_model_split2 --save-dir work_dirs --dior
+# python -m tools.initialize_bbox_head --src1 work_dirs/tfa_rsp_faster_rcnn_dior-base-split2-contrastive_trueclasses_bbox_agnostic_withbginqueue/latest.pth --method random_init --tar-name contrastive_agnostic_bginqueue_model_split2 --save-dir work_dirs --dior
 # please refer to configs/detection/tfa/README.md for more details.
 
 

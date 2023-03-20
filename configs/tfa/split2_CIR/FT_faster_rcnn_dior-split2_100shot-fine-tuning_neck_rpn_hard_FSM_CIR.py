@@ -30,7 +30,7 @@ runner = dict(type='IterBasedRunner', max_iters=30000)
 checkpoint_config = dict(interval=30000)
 
 # base model needs to be initialized with following script:
-# python -m tools.misc.initialize_bbox_head --src1 work_dirs/tfa_rsp_faster_rcnn_dior-base_split2_FSM_CIR/latest.pth --method random_init --tar-name base_model_CIR --save-dir work_dirs/tfa_rsp_faster_rcnn_dior-base_split2_FSM_CIR --dior
+# python -m tools.initialize_bbox_head --src1 work_dirs/tfa_rsp_faster_rcnn_dior-base_split2_FSM_CIR/latest.pth --method random_init --tar-name base_model_CIR --save-dir work_dirs/tfa_rsp_faster_rcnn_dior-base_split2_FSM_CIR --dior
 # please refer to configs/detection/tfa/README.md for more details.
 
 
