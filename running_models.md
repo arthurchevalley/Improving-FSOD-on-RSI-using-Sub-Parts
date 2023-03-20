@@ -127,7 +127,7 @@ data = dict(
 ```
 In additon, the fully-connected layers must be changed to match the number of classes. This is achieved by using initialize_bbox_head.py
 ```shell
-python -m tools.misc.initialize_bbox_head --src1 base_training_weight --method init_method --tar-name prefix_saving_name --save-dir saving_folder_of_new_weights --dior
+python -m tools.initialize_bbox_head --src1 base_training_weight --method init_method --tar-name prefix_saving_name --save-dir saving_folder_of_new_weights --dior
 ```
 Where _base_training_weight_ is the path to the base training weight, _init_method_ is how to initialise the classification weights, e.g. tests have been conducted with random_init, the new weights will be saved in folder _saving_folder_of_new_weights_ with the name starting with _prefix_saving_name_ and followed by _random_init_bbox_head.pth_ if random_init has been chosen. The last option --dior is needed to specify the dataset used.
 
@@ -148,10 +148,4 @@ load_from = ('work_dirs/base_contrastive_perclass_1_bbox_model_split2_random_ini
 To test model run the following:
 ```shell
 python tools/test.py config_file work_dirs/weight_file --work-dir test_results_folder/ --out output_name.pkl --gpu-id 0 --eval mAP
-```
-
-Once the test.py has been completed, to compute confusion matrix run:
-for cm:
-```shell
-python tools/analysis_tools/confusion_matrix.py config_file output_name test_results_folder/ --show 
 ```
