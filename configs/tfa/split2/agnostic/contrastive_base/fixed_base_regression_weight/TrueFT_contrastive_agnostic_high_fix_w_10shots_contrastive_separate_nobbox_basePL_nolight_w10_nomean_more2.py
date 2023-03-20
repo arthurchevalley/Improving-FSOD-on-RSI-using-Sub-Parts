@@ -39,9 +39,9 @@ model = dict(
                 loss_weight=0.5,
                 reweight_type='none',
                 no_bg = True),
-            loss_c_bbox=None,#dict(type='UPIoULossBBOX', loss_weight=.5),
+            loss_c_bbox=None,
             to_norm_cls = True,
-            queue_path = None,#'per_class_features.p',#res.p',
+            queue_path = None,
             use_queue = True,
             use_base_queue = True,
             use_novel_queue = True,
@@ -55,7 +55,7 @@ model = dict(
 data = dict(
     train=dict(
         type='ContrastiveFewShotDiorDefaultDataset',
-        dior_folder_path='/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+        dior_folder_path='/home/data/dior',
         ann_dif='hard',
         ann_cfg=[dict(method='TFA', setting='SPLIT2_10SHOT')],
         num_novel_shots=10,

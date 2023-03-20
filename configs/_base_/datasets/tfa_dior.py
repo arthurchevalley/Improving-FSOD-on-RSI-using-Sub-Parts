@@ -1,7 +1,7 @@
 
 # dataset settings
 dataset_type = 'FewShotDiorDataset'
-data_root = 'data/dior/'
+data_root = '/home/data/dior/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
@@ -40,7 +40,7 @@ data = dict(
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+        dior_folder_path = data_root,
         ann_cfg=[
             dict(
                 type='ann_file',
@@ -51,7 +51,7 @@ data = dict(
         classes=None),
     val=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+        dior_folder_path = data_root,
         ann_cfg=[
             dict(
                 type='ann_file',
@@ -62,7 +62,7 @@ data = dict(
         classes=None),
     test=dict(
         type=dataset_type,
-        dior_folder_path = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+        dior_folder_path = data_root,
         ann_cfg=[
             dict(
                 type='ann_file',

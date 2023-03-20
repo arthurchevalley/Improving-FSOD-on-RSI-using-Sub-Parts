@@ -54,7 +54,7 @@ model = dict(
 data = dict(
     train=dict(
         type='ContrastiveFewShotDiorDefaultDataset',
-        dior_folder_path='/home/archeval/mmdetection/CATNet/mmdetection/data/dior',
+        dior_folder_path='/home/data/dior',
         ann_dif='hard',
         ann_cfg=[dict(method='TFA', setting='SPLIT2_10SHOT')],
         num_novel_shots=10,
