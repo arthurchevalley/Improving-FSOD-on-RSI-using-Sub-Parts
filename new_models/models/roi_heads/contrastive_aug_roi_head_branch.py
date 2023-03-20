@@ -1313,26 +1313,7 @@ class DualCosContRoIHead_Branch_novcls(BaseRoIHead, BBoxTestMixin, MaskTestMixin
         
             redo_bbox_targets = (labels_novel, 0.5*bbox_targets[1].clone(), bbox_targets[2].clone(), .5*bbox_targets[3].clone())
             redo_aug_bbox_targets = (aug_labels_novel, 0.5*aug_bbox_targets[1].clone(), aug_bbox_targets[2].clone(), .5*aug_bbox_targets[3].clone())
-        #print(bbox_targets[1].shape)
-        #fuse_bbox_targets = (torch.hstack((base_bbox_targets[0], labels_novel, aug_labels_novel)),
-        #                    torch.hstack((base_bbox_targets[1], 0.5*bbox_targets[1], 0.5*aug_bbox_targets[1])),
-        #                    torch.vstack((base_bbox_targets[2], bbox_targets[2], .5*bbox_targets[3])),
-         #                   torch.vstack((base_bbox_targets[3], aug_bbox_targets[2], .5*aug_bbox_targets[3]))
-         #                   )
-        #fuse_cls_score = torch.vstack((base_bbox_results['cls_score'], bbox_results['cls_score'], aug_bbox_results['cls_score']))
-        #fuse_bbox_pred = torch.vstack((base_bbox_results['bbox_pred'], bbox_results['bbox_pred'], aug_bbox_results['bbox_pred']))
-        #fuse_iou = torch.vstack((base_rois, rois, aug_rois))
-        #print(f'lbl {fuse_bbox_targets[0].shape, fuse_cls_score.shape}')
-        #print(f'bbox {fuse_bbox_targets[2].shape, fuse_bbox_pred.shape}')
-        
-        #loss_bbox = self.bbox_head.loss(fuse_cls_score,
-        #                                fuse_bbox_pred, 
-        #                                fuse_iou,
-        #                                *fuse_bbox_targets)
-        #del fuse_bbox_targets
-        ##del fuse_cls_score
-        #del fuse_bbox_pred
-        #del fuse_iou
+
         
         loss_bbox_base = self.bbox_head.loss(base_bbox_results['cls_score'],
                                         base_bbox_results['bbox_pred'], 
