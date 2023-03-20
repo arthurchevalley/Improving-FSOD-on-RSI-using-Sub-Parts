@@ -27,6 +27,7 @@ model = dict(
             with_weight_decay=True,
             main_training=True,
             same_class = True,
+            same_class_all=True,
             num_classes=15,
             loss_bbox=dict(type='SmoothL1Loss_analyse', beta=1.0, loss_weight=10.0),
             loss_cosine=dict(
@@ -89,6 +90,7 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=0.001,
     step=[7, 10])
+
 
 
 optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)

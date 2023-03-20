@@ -53,10 +53,12 @@ class AugmentationChange(Hook):
 
 @HOOKS.register_module()
 class BBOX_WEIGHT_CHANGE(Hook):
-    """Unfreeze backbone network Hook.
+    """Change the regression weight during training
 
     Args:
         change_weight_epoch (int): The epoch changing the loss weight
+        increase_ratio_bbox (float): coefficient of change of the weight, i.e. new_w = increase_ratio_bbox * old_w
+        number_of_epoch_step_bbox (int): Step in epoch before the next change
     """
 
     def __init__(self, 
@@ -69,13 +71,12 @@ class BBOX_WEIGHT_CHANGE(Hook):
         self.number_of_epoch_step_bbox = number_of_epoch_step_bbox
 
     def before_train_epoch(self, runner):
-        # Unfreeze the backbone network.
-        # Only valid for resnet.
+        
         print(f'current epoch: {runner.epoch}')
-        print(f'chaning at {self.change_weight_epoch_bbox} for bbox')
+        print(f'chanigng at {self.change_weight_epoch_bbox} for bbox')
 
         if runner.epoch == self.change_weight_epoch_bbox:
-            print('change of bbox loss weight')
+            print('d change of bbox loss weight')
             model = runner.model
             self.change_weight_epoch_bbox += self.number_of_epoch_step_bbox 
             if is_module_wrapper(model):
@@ -89,10 +90,13 @@ class BBOX_WEIGHT_CHANGE(Hook):
 
 @HOOKS.register_module()
 class Bbox_Cont_Weight_Change(Hook):
-    """Unfreeze backbone network Hook.
+    """Change the contrastive weight during training
 
     Args:
-        change_weight_epoch (int): The epoch changing the loss weight
+        change_weight_epoch_bbox (int): The epoch changing the regression loss weight
+        increase_ratio_bbox (float): coefficient of change of the weight, i.e. new_w = increase_ratio_bbox * old_w
+        number_of_epoch_step_bbox (int): Step in epoch before the next change
+        new_contrastive_loss (flaot): New value of contrastive loss
     """
 
     def __init__(self, 
@@ -107,8 +111,7 @@ class Bbox_Cont_Weight_Change(Hook):
         self.new_contrastive_loss = new_contrastive_loss
 
     def before_train_epoch(self, runner):
-        # Unfreeze the backbone network.
-        # Only valid for resnet.
+        
         print(f'current epoch: {runner.epoch}')
         print(f'chaning at {self.change_weight_epoch_bbox} for bbox')
 
@@ -135,10 +138,12 @@ class Bbox_Cont_Weight_Change(Hook):
             
 @HOOKS.register_module()
 class save_bbox_feat(Hook):
-    """Unfreeze backbone network Hook.
+    """
+    Save the queue in a pickle file, in terms of epoch
 
     Args:
-        change_weight_epoch (int): The epoch changing the loss weight
+        save_epoch (int): The epoch when to save
+        number_of_epoch_step (int): Step in epoch before the next save
     """
 
     def __init__(self, 
@@ -149,8 +154,7 @@ class save_bbox_feat(Hook):
         self.number_of_epoch_step = number_of_epoch_step
 
     def after_train_epoch(self, runner):
-        # Unfreeze the backbone network.
-        # Only valid for resnet.
+        
         print(f'current epoch: {runner.epoch}')
         print(f'chaning at {self.save_epoch} for bbox')
 
@@ -166,10 +170,12 @@ class save_bbox_feat(Hook):
 
 @HOOKS.register_module()
 class save_bbox_feat_iter(Hook):
-    """Unfreeze backbone network Hook.
+    """
+    Save the queue in a pickle file, in terms of iterations
 
     Args:
-        change_weight_epoch (int): The epoch changing the loss weight
+        save_iter (int): The iter when to save
+        number_of_iter_step (int): Step in iter before the next save
     """
 
     def __init__(self, 

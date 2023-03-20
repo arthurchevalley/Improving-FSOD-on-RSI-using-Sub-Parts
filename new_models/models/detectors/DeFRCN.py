@@ -41,7 +41,7 @@ def decouple_layer(x, _lambda):
 
 @DETECTORS.register_module()
 class DeFASTERRCNN(TwoStageDetector):
-    """Implementation of `Faster R-CNN <https://arxiv.org/abs/1506.01497>`_"""
+    """Implementation of `Decoupled Faster R-CNN_"""
 
     def __init__(self,
                  backbone,

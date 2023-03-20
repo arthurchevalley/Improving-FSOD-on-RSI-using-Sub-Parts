@@ -13,7 +13,9 @@ from mmcv.runner import BaseModule, auto_fp16
 
 @DETECTORS.register_module()
 class CFRCNN(BaseDetector):
-    """Base class for two-stage detectors.
+    """
+    DEPRACTED !! USE OptimizeCFRCNN instead
+    Base class for contrastive two-stage detectors.
 
     Two-stage detectors typically consisting of a region proposal network and a
     task-specific regression head.
@@ -380,9 +382,6 @@ class CFRCNN(BaseDetector):
             losses.update(roi_losses)
             
         return losses
-
- 
- 
     
     async def async_simple_test(self,
                                 img,
@@ -444,7 +443,8 @@ class CFRCNN(BaseDetector):
 
 @DETECTORS.register_module()
 class OptimizeCFRCNN(BaseDetector):
-    """Base class for two-stage detectors.
+    """
+    Base class for contrastive two-stage detectors used at the begining. Worst performing than the model CosSimFRCNN.
 
     Two-stage detectors typically consisting of a region proposal network and a
     task-specific regression head.
@@ -784,7 +784,8 @@ class OptimizeCFRCNN(BaseDetector):
 
 @DETECTORS.register_module()
 class OptimizeCFRCNN_CIR(BaseDetector):
-    """Base class for two-stage detectors.
+    """
+    Base class for contrastive two-stage detectors using "Context Information Refinment" between backbone and FPN
 
     Two-stage detectors typically consisting of a region proposal network and a
     task-specific regression head.
@@ -1226,7 +1227,11 @@ class OptimizeCFRCNN_CIR(BaseDetector):
 
 @DETECTORS.register_module()
 class OptimizeCosSimCFRCNN(BaseDetector):
-    """Base class for two-stage detectors.
+    """
+    Contrastive Faster R-CNN using Sub-Parts, using two RoI and RPN branch:
+    one for base classes, one for Sub-Parts
+
+    Worst performing than CosSimFRCNN
 
     Two-stage detectors typically consisting of a region proposal network and a
     task-specific regression head.
@@ -1438,19 +1443,6 @@ class OptimizeCosSimCFRCNN(BaseDetector):
 
         # cosine sim of nbboxes and bboxes
 
-        
-        #batch, channel, height, width = all_features.size(0), all_features.size(1), all_features.size(2), all_features.size(3)
-        #all_features_reshape = all_features.view(batch, -1).contiguous()
-
-        # cosine similarity
-        #dot_product_mat = torch.matmul(all_features_reshape, torch.transpose(all_features_reshape, 0, 1))
-        #len_vec = torch.unsqueeze(torch.sqrt(torch.sum(all_features_reshape * all_features_reshape, dim=1)), dim=0)
-        #len_mat = torch.mm(torch.transpose(len_vec, 0, 1), len_vec)
-        #cos_sim_mat = dot_product_mat / len_mat / batch
-
-        #all_features_new = torch.mm(cos_sim_mat, all_features_reshape).view(batch, channel, height, width)+all_features
-
-
         # shape of gt_nbboxes: list of batch length and each has: nbr bbox on image x nbr contrastive classes x [xmin ymin xmax ymax]
         # shape of gt_nlabels: list of batch length and each has: nbr bbox on image x nbr contrastive classes 
         
@@ -1588,7 +1580,8 @@ class OptimizeCosSimCFRCNN(BaseDetector):
 
 @DETECTORS.register_module()
 class CosSimFRCNN(BaseDetector):
-    """Base class for two-stage detectors.
+    """
+    Contrastive Faster R-CNN using Sub-Parts, model used in the Thesis.
 
     Two-stage detectors typically consisting of a region proposal network and a
     task-specific regression head.

@@ -59,23 +59,9 @@ class ConstellationLossCLS(nn.Module):
                  loss_weight=1.0,
                  reduction = 'mean',
                  activated=False):
-        """`Focal Loss <https://arxiv.org/abs/1708.02002>`_
-
-        Args:
-            use_sigmoid (bool, optional): Whether to the prediction is
-                used for sigmoid or softmax. Defaults to True.
-            gamma (float, optional): The gamma for calculating the modulating
-                factor. Defaults to 2.0.
-            alpha (float, optional): A balanced form for Focal Loss.
-                Defaults to 0.25.
-            reduction (str, optional): The method used to reduce the loss into
-                a scalar. Defaults to 'mean'. Options are "none", "mean" and
-                "sum".
-            loss_weight (float, optional): Weight of loss. Defaults to 1.0.
-            activated (bool, optional): Whether the input is activated.
-                If True, it means the input has been activated and can be
-                treated as probabilities. Else, it should be treated as logits.
-                Defaults to False.
+        """
+            Tests of a constellation loss for classification. Adapted from https://arxiv.org/abs/1905.10675
+            Leads to worst results than the supervised contrastive loss
         """
         super(ConstellationLossCLS, self).__init__()
         self.K = K
@@ -130,7 +116,6 @@ class ConstellationLossCLS(nn.Module):
 
         # cls_score_pred size: sampled number x classes
         # cls_score_pred size: sampled number x classes
-        # labels size: 
         
         true_aug_labels = []
         for i in range(BATCH_SIZE):
@@ -140,8 +125,6 @@ class ConstellationLossCLS(nn.Module):
         aug_labels = aug_bbox_targets[0].tolist()
         loss_list = []
 
-        #print(f' true aug lbl {true_aug_labels} aug lbl {aug_labels} lbl {len(labels)}')
-        #print(f'aug pred {aug_cls_score_pred.shape} pred {cls_score_pred.shape}')
         for i in range(len(aug_labels)): 
             if aug_labels[i] in true_aug_labels:
                 f_i_a = aug_cls_score_pred[i,:]
@@ -271,7 +254,10 @@ def ciou_loss(pred, target, eps=1e-7):
 @LOSSES.register_module()
 class IoULossBBOX(nn.Module):
 
-
+    """
+        Tests of various IoU loss for regression. 
+        No good results achieved
+    """
     def __init__(self,
                  eps=1e-6,
                  K = 4,
@@ -488,7 +474,7 @@ class IoULossBBOX(nn.Module):
     
 @LOSSES.register_module()
 class ConstellationLossBBOX(nn.Module):
-
+    
 
     def __init__(self,
                  beta=1./9.,
@@ -497,23 +483,9 @@ class ConstellationLossBBOX(nn.Module):
                  loss_weight=1.0,
                  reduction = 'mean',
                  activated=False):
-        """`Focal Loss <https://arxiv.org/abs/1708.02002>`_
-
-        Args:
-            use_sigmoid (bool, optional): Whether to the prediction is
-                used for sigmoid or softmax. Defaults to True.
-            gamma (float, optional): The gamma for calculating the modulating
-                factor. Defaults to 2.0.
-            alpha (float, optional): A balanced form for Focal Loss.
-                Defaults to 0.25.
-            reduction (str, optional): The method used to reduce the loss into
-                a scalar. Defaults to 'mean'. Options are "none", "mean" and
-                "sum".
-            loss_weight (float, optional): Weight of loss. Defaults to 1.0.
-            activated (bool, optional): Whether the input is activated.
-                If True, it means the input has been activated and can be
-                treated as probabilities. Else, it should be treated as logits.
-                Defaults to False.
+        """
+            Tests of a constellation loss for regression. Adapted from https://arxiv.org/abs/1905.10675
+            No results from it
         """
         super(ConstellationLossBBOX, self).__init__()
         self.K = K
@@ -607,18 +579,18 @@ class ConstellationLossBBOX(nn.Module):
                 h = 800
                 for transfo in transform_applied[current_batch_id]:  
                     if transfo != 'horizontal' and transfo != 'vertical' and transfo != 'diagonal' and transfo != 'vanilla':
-                        #print(f'transformation {transfo}')   
+
                         if transfo == 'horizontal':
-                            w = 800#img_shape[current_batch_id][0]
+                            w = 800
                             flipped[0::4] = w - f_i_a[2::4]
                             flipped[2::4] = w - f_i_a[0::4]
                         elif transfo == 'vertical':
-                            h = 800#img_shape[current_batch_id][1]
+                            h = 800
                             flipped[1::4] = h - f_i_a[3::4]
                             flipped[3::4] = h - f_i_a[1::4]
                         elif transfo == 'diagonal':
-                            w = 800#img_shape[current_batch_id][0]
-                            h = 800#img_shape[current_batch_id][1]
+                            w = 800
+                            h = 800
                             flipped[0::4] = w - f_i_a[2::4]
                             flipped[1::4] = h - f_i_a[3::4]
                             flipped[2::4] = w - f_i_a[0::4]
@@ -650,7 +622,7 @@ class ConstellationLossBBOX(nn.Module):
 
         seen_id = []
         for i in range(label_targets.shape[0]): 
-            if label_targets[i] in label_targets_aug.unique(): #and label_targets[i] not in seen_id:
+            if label_targets[i] in label_targets_aug.unique(): 
                 mask.append(True)
                 seen_id.append(label_targets[i])
             else:
@@ -698,9 +670,7 @@ class ConstellationLossBBOX(nn.Module):
         bb2_to_keep = torch.zeros(4)
         for bb1_id in range(bb1.shape[0]):
             for bb2_id in range(bb2.shape[0]):
-                print(f'bb1 {bb1[bb1_id]} bb2 {bb2[bb2_id]}')
-                # bb1/bb2 shae nbr bboxes, xmin, ymin, xmax, ymax
-                
+                print(f'bb1 {bb1[bb1_id]} bb2 {bb2[bb2_id]}')                
 
                 x_left = max(bb1[bb1_id][0], bb2[bb2_id][0])
                 y_top = max(bb1[bb1_id][1], bb2[bb2_id][1])

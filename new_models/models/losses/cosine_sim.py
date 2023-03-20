@@ -15,22 +15,13 @@ class CosineSim(nn.Module):
                  margin = .5,
                  max_contrastive_loss = 3.,
                  loss_weight=.5):
-        """CrossEntropyLoss.
-
+        """
+        Tests using a cosine similarity loss.
+        Not leading to good results
         Args:
-            use_sigmoid (bool, optional): Whether the prediction uses sigmoid
-                of softmax. Defaults to False.
-            use_mask (bool, optional): Whether to use mask cross entropy loss.
-                Defaults to False.
-            reduction (str, optional): . Defaults to 'mean'.
-                Options are "none", "mean" and "sum".
-            class_weight (list[float], optional): Weight of each class.
-                Defaults to None.
-            ignore_index (int | None): The label index to be ignored.
-                Defaults to None.
-            loss_weight (float, optional): Weight of the loss. Defaults to 1.0.
-            avg_non_ignore (bool): The flag decides to whether the loss is
-                only averaged over non-ignored targets. Default: False.
+            margin: margin to enforce between positives and negatives
+            loss_weight: weighting of the loss
+            max_contrastive_loss: maximum value of the loss
         """
         super(CosineSim, self).__init__()
         

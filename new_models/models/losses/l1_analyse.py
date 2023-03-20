@@ -76,7 +76,7 @@ def l1_loss_a(pred, target):
 
 @LOSSES.register_module()
 class SmoothL1Loss_analyse(nn.Module):
-    """Smooth L1 loss.
+    """Smooth L1 loss handling NaN prediction
 
     Args:
         beta (float, optional): The threshold in the piecewise function.
@@ -130,7 +130,7 @@ class SmoothL1Loss_analyse(nn.Module):
 
 @LOSSES.register_module()
 class L1Loss_analyse(nn.Module):
-    """L1 loss.
+    """L1 loss handling NaN predicitions.
 
     Args:
         reduction (str, optional): The method to reduce the loss.

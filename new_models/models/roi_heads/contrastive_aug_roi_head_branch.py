@@ -9,8 +9,12 @@ from .test_mixins import BBoxTestMixin, MaskTestMixin
 
 @HEADS.register_module()
 class CosContRoIHead_Branch(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
-    """Simplest base roi head including one bbox head and one mask head."""
+    """
+    Contrastive RoI head handling using only contrastive loss on Sub-Parts. 
+    The contrastive loss is the consteallation one or so, not suited for supervised contrastive loss.
 
+    DEPRACTED
+    """
     def init_assigner_sampler(self):
         """Initialize assigner and sampler."""
         self.bbox_assigner = None
@@ -70,13 +74,26 @@ class CosContRoIHead_Branch(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
 
         """
         Args:
-            x (list[Tensor]): list of multi-level img features.
+        Args:
+            img_features (list[Tensor]): list of multi-level img features.
             img_metas (list[dict]): list of image info dict where each dict
                 has: 'img_shape', 'scale_factor', 'flip', and may also contain
                 'filename', 'ori_shape', 'pad_shape', and 'img_norm_cfg'.
                 For details on the values of these keys see
                 `mmdet/datasets/pipelines/formatting.py:Collect`.
             proposals (list[Tensors]): list of region proposals.
+
+            gt_nbboxes (list[Tensor]): Ground truth bboxes for each image with
+                shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format for Sub-parts.
+            gt_nlabels (list[Tensor]): class indices corresponding to each Sub-parts
+            aug_img_features (list[Tensor]): list of multi-level img features from augmented image.
+            c_proposals (list[Tensors]): list of region proposals for augmented image.
+
+            gt_bboxes_aug (list[Tensor]): Ground truth bboxes for each image with
+                shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format for augmented Sub-parts.
+            gt_labels_aug (list[Tensor]): class indices corresponding to each augmented Sub-parts
+            gt_labels_aug_true (list[Tensor]): real class indices corresponding to each augmented Sub-parts
+
             gt_bboxes (list[Tensor]): Ground truth bboxes for each image with
                 shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
             gt_labels (list[Tensor]): class indices corresponding to each box
@@ -148,7 +165,7 @@ class CosContRoIHead_Branch(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
         losses = dict()
         # bbox head forward and loss
         if self.with_bbox:
-            #print("in CRFCNN ")
+
             bbox_results = self._bbox_forward_train(img_features, base_sampling_results, sampling_results,
                                                     gt_nbboxes, gt_nlabels,
                                                     aug_img_features, aug_sampling_results,
@@ -528,10 +545,12 @@ class CosContRoIHead_Branch(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
 
         return det_bboxes, det_labels
 
+# All following RoIs are for the Supervised contrastive loss
 @HEADS.register_module()
 class DualCosContRoIHead_Branch(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
-    """Simplest base roi head including one bbox head and one mask head."""
-
+    """
+    Contrastive RoI head handling using only contrastive loss on Sub-Parts
+    """
     def init_assigner_sampler(self):
         """Initialize assigner and sampler."""
         self.bbox_assigner = None
@@ -591,13 +610,26 @@ class DualCosContRoIHead_Branch(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
 
         """
         Args:
-            x (list[Tensor]): list of multi-level img features.
+        Args:
+            img_features (list[Tensor]): list of multi-level img features.
             img_metas (list[dict]): list of image info dict where each dict
                 has: 'img_shape', 'scale_factor', 'flip', and may also contain
                 'filename', 'ori_shape', 'pad_shape', and 'img_norm_cfg'.
                 For details on the values of these keys see
                 `mmdet/datasets/pipelines/formatting.py:Collect`.
             proposals (list[Tensors]): list of region proposals.
+
+            gt_nbboxes (list[Tensor]): Ground truth bboxes for each image with
+                shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format for Sub-parts.
+            gt_nlabels (list[Tensor]): class indices corresponding to each Sub-parts
+            aug_img_features (list[Tensor]): list of multi-level img features from augmented image.
+            c_proposals (list[Tensors]): list of region proposals for augmented image.
+
+            gt_bboxes_aug (list[Tensor]): Ground truth bboxes for each image with
+                shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format for augmented Sub-parts.
+            gt_labels_aug (list[Tensor]): class indices corresponding to each augmented Sub-parts
+            gt_labels_aug_true (list[Tensor]): real class indices corresponding to each augmented Sub-parts
+
             gt_bboxes (list[Tensor]): Ground truth bboxes for each image with
                 shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
             gt_labels (list[Tensor]): class indices corresponding to each box
@@ -669,7 +701,7 @@ class DualCosContRoIHead_Branch(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
         losses = dict()
         # bbox head forward and loss
         if self.with_bbox:
-            #print("in CRFCNN ")
+
             bbox_results = self._bbox_forward_train(img_features, base_sampling_results, sampling_results,
                                                     gt_nbboxes, gt_nlabels,
                                                     aug_img_features, aug_sampling_results,
@@ -970,8 +1002,11 @@ class DualCosContRoIHead_Branch(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
 
 @HEADS.register_module()
 class DualCosContRoIHead_Branch_novcls(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
-    """Simplest base roi head including one bbox head and one mask head."""
-
+    """
+    Contrastive RoI head handling.
+    Both object and Sub-Parts are used for classification (novcls) and in regression 
+    The predictions and GTs are treated as one and computed in a single loss.
+    """
     def init_assigner_sampler(self):
         """Initialize assigner and sampler."""
         self.bbox_assigner = None
@@ -1031,13 +1066,25 @@ class DualCosContRoIHead_Branch_novcls(BaseRoIHead, BBoxTestMixin, MaskTestMixin
 
         """
         Args:
-            x (list[Tensor]): list of multi-level img features.
+            img_features (list[Tensor]): list of multi-level img features.
             img_metas (list[dict]): list of image info dict where each dict
                 has: 'img_shape', 'scale_factor', 'flip', and may also contain
                 'filename', 'ori_shape', 'pad_shape', and 'img_norm_cfg'.
                 For details on the values of these keys see
                 `mmdet/datasets/pipelines/formatting.py:Collect`.
             proposals (list[Tensors]): list of region proposals.
+
+            gt_nbboxes (list[Tensor]): Ground truth bboxes for each image with
+                shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format for Sub-parts.
+            gt_nlabels (list[Tensor]): class indices corresponding to each Sub-parts
+            aug_img_features (list[Tensor]): list of multi-level img features from augmented image.
+            c_proposals (list[Tensors]): list of region proposals for augmented image.
+
+            gt_bboxes_aug (list[Tensor]): Ground truth bboxes for each image with
+                shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format for augmented Sub-parts.
+            gt_labels_aug (list[Tensor]): class indices corresponding to each augmented Sub-parts
+            gt_labels_aug_true (list[Tensor]): real class indices corresponding to each augmented Sub-parts
+
             gt_bboxes (list[Tensor]): Ground truth bboxes for each image with
                 shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
             gt_labels (list[Tensor]): class indices corresponding to each box
@@ -1467,8 +1514,11 @@ class DualCosContRoIHead_Branch_novcls(BaseRoIHead, BBoxTestMixin, MaskTestMixin
 
 @HEADS.register_module()
 class DualCosContRoIHead_Branch_novcls_separate(DualCosContRoIHead_Branch_novcls):
-    """Simplest base roi head including one bbox head and one mask head."""
-
+    """
+    Contrastive RoI head handling.
+    Both object and Sub-Parts are used for classification (novcls) and in regression 
+    The predictions and GTs are treated as independantly and computed in different losses.
+    """
     def _bbox_forward_train(self, x, base_sampling_results, sampling_results, 
                             gt_nbboxes, gt_nlabels,
                             x_aug, aug_sampling_results, 
@@ -1584,14 +1634,6 @@ class DualCosContRoIHead_Branch_novcls_separate(DualCosContRoIHead_Branch_novcls
             
         loss_roi.update(tmp_loss)
         del tmp_loss
-        #loss_fuse = sum([loss_bbox_base['loss_cls'],loss_bbox_novel['loss_cls'],loss_bbox_aug['loss_cls']])
-        #loss_bbox_base.update(loss_cls=loss_fuse)
-
-        #loss_fuse = sum([loss_bbox_base['loss_bbox'],loss_bbox_novel['loss_bbox'],loss_bbox_aug['loss_bbox']])
-        #loss_bbox_base.update(loss_bbox=loss_fuse)
-
-        #loss_fuse = sum([loss_bbox_base['acc'],loss_bbox_novel['acc'],loss_bbox_aug['acc']])/3
-        #loss_bbox_base.update(acc=loss_fuse)
 
 
         aug_cls_score_pred = aug_bbox_results['cls_score']
@@ -1627,8 +1669,13 @@ class DualCosContRoIHead_Branch_novcls_separate(DualCosContRoIHead_Branch_novcls
 
 @HEADS.register_module()
 class DualCosContRoIHead_Branch_novcls_nobbox_separate(DualCosContRoIHead_Branch_novcls):
-    """Simplest base roi head including one bbox head and one mask head."""
+    """
+    Contrastive RoI head handling.
+    Both object and Sub-Parts are used for classification (novcls) but not used in regression (nobbox)
 
+    The predictions and GTs are treated as independantly and computed in different losses.
+
+    """
     def _bbox_forward_train(self, x, base_sampling_results, sampling_results, 
                             gt_nbboxes, gt_nlabels,
                             x_aug, aug_sampling_results, 
@@ -1690,7 +1737,6 @@ class DualCosContRoIHead_Branch_novcls_nobbox_separate(DualCosContRoIHead_Branch
         x_aug = tuple(x_aug_c)
         aug_rois = aug_rois.contiguous()
 
-        #print(f'roi shape base, novel aug {base_rois.shape, aug_rois.shape, rois.shape}')
 
         base_bbox_results, bbox_results, aug_bbox_results = self._bbox_forward(x, base_rois, rois, x_aug, aug_rois)
         base_bbox_targets = self.bbox_head.get_targets(base_sampling_results, gt_base_bbox, gt_base_labels, self.train_cfg)
@@ -1750,14 +1796,7 @@ class DualCosContRoIHead_Branch_novcls_nobbox_separate(DualCosContRoIHead_Branch
             
         loss_roi.update(tmp_loss)
         del tmp_loss
-        #loss_fuse = sum([loss_bbox_base['loss_cls'],loss_bbox_novel['loss_cls'],loss_bbox_aug['loss_cls']])
-        #loss_bbox_base.update(loss_cls=loss_fuse)
 
-        #loss_fuse = sum([loss_bbox_base['loss_bbox'],loss_bbox_novel['loss_bbox'],loss_bbox_aug['loss_bbox']])
-        #loss_bbox_base.update(loss_bbox=loss_fuse)
-
-        #loss_fuse = sum([loss_bbox_base['acc'],loss_bbox_novel['acc'],loss_bbox_aug['acc']])/3
-        #loss_bbox_base.update(acc=loss_fuse)
 
 
         aug_cls_score_pred = aug_bbox_results['cls_score']
@@ -1792,7 +1831,13 @@ class DualCosContRoIHead_Branch_novcls_nobbox_separate(DualCosContRoIHead_Branch
 
 @HEADS.register_module()
 class DualCosContRoIHead_Branch_novcls_nobbox(DualCosContRoIHead_Branch_novcls):
-    """Simplest base roi head including one bbox head and one mask head."""
+    """
+    Contrastive RoI head handling.
+    Both object and Sub-Parts are used for classification (novcls) but not used in regression (nobbox)
+
+    All prediction and GTs are treated as one and computed in a single loss.
+
+    """
 
     def _bbox_forward_train(self, x, base_sampling_results, sampling_results, 
                             gt_nbboxes, gt_nlabels,
@@ -1836,7 +1881,6 @@ class DualCosContRoIHead_Branch_novcls_nobbox(DualCosContRoIHead_Branch_novcls):
         rois = rois.contiguous()
 
 
-
         aug_rois = bbox2roi([res.bboxes for res in aug_sampling_results])
 
         proposal_ious = []
@@ -1873,11 +1917,6 @@ class DualCosContRoIHead_Branch_novcls_nobbox(DualCosContRoIHead_Branch_novcls):
         
         classes_eq = {gt_nlabels_tmp[i]: gt_labels_aug_tmp[i] for i in range(len(gt_nlabels_tmp))}
 
-        #loss_bbox = self.bbox_head.loss(base_bbox_results['cls_score'],
-         #                               base_bbox_results['bbox_pred'], 
-          #                              base_rois,
-           #                             *base_bbox_targets)
-        #print(f'loss {loss_bbox}')
         if classes_eq is not None:
             classes_eq[self.bbox_head.num_classes]=self.bbox_head.num_classes
             if (bbox_targets[0] > self.bbox_head.num_classes).any():
@@ -1887,26 +1926,7 @@ class DualCosContRoIHead_Branch_novcls_nobbox(DualCosContRoIHead_Branch_novcls):
         
             redo_bbox_targets = (labels_novel, 0.5*bbox_targets[1].clone(), bbox_targets[2].clone(), .5*bbox_targets[3].clone())
             redo_aug_bbox_targets = (aug_labels_novel, 0.5*aug_bbox_targets[1].clone(), aug_bbox_targets[2].clone(), .5*aug_bbox_targets[3].clone())
-        #print(bbox_targets[1].shape)
-        #fuse_bbox_targets = (torch.hstack((base_bbox_targets[0], labels_novel, aug_labels_novel)),
-        #                    torch.hstack((base_bbox_targets[1], 0.5*bbox_targets[1], 0.5*aug_bbox_targets[1])),
-        #                    torch.vstack((base_bbox_targets[2], bbox_targets[2], .5*bbox_targets[3])),
-         #                   torch.vstack((base_bbox_targets[3], aug_bbox_targets[2], .5*aug_bbox_targets[3]))
-         #                   )
-        #fuse_cls_score = torch.vstack((base_bbox_results['cls_score'], bbox_results['cls_score'], aug_bbox_results['cls_score']))
-        #fuse_bbox_pred = torch.vstack((base_bbox_results['bbox_pred'], bbox_results['bbox_pred'], aug_bbox_results['bbox_pred']))
-        #fuse_iou = torch.vstack((base_rois, rois, aug_rois))
-        #print(f'lbl {fuse_bbox_targets[0].shape, fuse_cls_score.shape}')
-        #print(f'bbox {fuse_bbox_targets[2].shape, fuse_bbox_pred.shape}')
-        
-        #loss_bbox = self.bbox_head.loss(fuse_cls_score,
-        #                                fuse_bbox_pred, 
-        #                                fuse_iou,
-        #                                *fuse_bbox_targets)
-        #del fuse_bbox_targets
-        ##del fuse_cls_score
-        #del fuse_bbox_pred
-        #del fuse_iou
+
         
         loss_bbox_base = self.bbox_head.loss(base_bbox_results['cls_score'],
                                         base_bbox_results['bbox_pred'], 
@@ -1960,7 +1980,9 @@ class DualCosContRoIHead_Branch_novcls_nobbox(DualCosContRoIHead_Branch_novcls):
 
 @HEADS.register_module()
 class Agnostic_DualCosContRoIHead_Branch_novcls_nobbox_separate(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
-    """Simplest base roi head including one bbox head and one mask head."""
+    """
+    Agnostic contrative Faster R-CNN RoI head without using the Sub-Parts for regression using three separate RoI passes.
+    """
 
     def init_assigner_sampler(self):
         """Initialize assigner and sampler."""
@@ -2021,13 +2043,24 @@ class Agnostic_DualCosContRoIHead_Branch_novcls_nobbox_separate(BaseRoIHead, BBo
 
         """
         Args:
-            x (list[Tensor]): list of multi-level img features.
+            img_features (list[Tensor]): list of multi-level img features.
             img_metas (list[dict]): list of image info dict where each dict
                 has: 'img_shape', 'scale_factor', 'flip', and may also contain
                 'filename', 'ori_shape', 'pad_shape', and 'img_norm_cfg'.
                 For details on the values of these keys see
                 `mmdet/datasets/pipelines/formatting.py:Collect`.
-            proposals (list[Tensors]): list of region proposals.
+
+            gt_nbboxes (list[Tensor]): Ground truth bboxes for each image with
+                shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format for Sub-parts.
+            gt_nlabels (list[Tensor]): class indices corresponding to each Sub-parts
+            aug_img_features (list[Tensor]): list of multi-level img features from augmented image.
+            c_proposals (list[Tensors]): list of region proposals for augmented image.
+
+            gt_bboxes_aug (list[Tensor]): Ground truth bboxes for each image with
+                shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format for augmented Sub-parts.
+            gt_labels_aug (list[Tensor]): class indices corresponding to each augmented Sub-parts
+            gt_labels_aug_true (list[Tensor]): real class indices corresponding to each augmented Sub-parts
+
             gt_bboxes (list[Tensor]): Ground truth bboxes for each image with
                 shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
             gt_labels (list[Tensor]): class indices corresponding to each box
@@ -2035,6 +2068,10 @@ class Agnostic_DualCosContRoIHead_Branch_novcls_nobbox_separate(BaseRoIHead, BBo
                 boxes can be ignored when computing the loss.
             gt_masks (None | Tensor) : true segmentation masks for each box
                 used if the architecture supports a segmentation task.
+
+            proposals (list[Tensors]): list of region proposals.
+            
+
 
         Returns:
             dict[str, Tensor]: a dictionary of loss components
@@ -2099,7 +2136,6 @@ class Agnostic_DualCosContRoIHead_Branch_novcls_nobbox_separate(BaseRoIHead, BBo
         losses = dict()
         # bbox head forward and loss
         if self.with_bbox:
-            #print("in CRFCNN ")
             bbox_results = self._bbox_forward_train(img_features, base_sampling_results, sampling_results,
                                                     gt_nbboxes, gt_nlabels,
                                                     aug_img_features, aug_sampling_results,
@@ -2225,8 +2261,6 @@ class Agnostic_DualCosContRoIHead_Branch_novcls_nobbox_separate(BaseRoIHead, BBo
             x_aug_c.append(x_aug[i].contiguous())
         x_aug = tuple(x_aug_c)
         aug_rois = aug_rois.contiguous()
-
-        #print(f'roi shape base, novel aug {base_rois.shape, aug_rois.shape, rois.shape}')
 
         base_bbox_results, bbox_results, aug_bbox_results = self._bbox_forward(x, base_rois, rois, x_aug, aug_rois)
         base_bbox_targets = self.bbox_head.get_targets(base_sampling_results, gt_base_bbox, gt_base_labels, self.train_cfg)
@@ -2414,7 +2448,7 @@ class Agnostic_DualCosContRoIHead_Branch_novcls_nobbox_separate(BaseRoIHead, BBo
 
 @HEADS.register_module()
 class Agnostic_RoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
-    """Simplest base roi head including one bbox head and one mask head."""
+    """Simplest base roi head including one bbox head and one mask head but no classification head."""
 
     def init_assigner_sampler(self):
         """Initialize assigner and sampler."""
@@ -2510,7 +2544,6 @@ class Agnostic_RoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
         losses = dict()
         # bbox head forward and loss
         if self.with_bbox:
-            #print("in CRFCNN ")
             bbox_results = self._bbox_forward_train(img_features, base_sampling_results,
                                                     gt_bboxes, gt_labels,
                                                     img_metas)
@@ -2536,9 +2569,6 @@ class Agnostic_RoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
         if self.with_shared_head:
             base_bbox_feats = self.shared_head(bbox_feats)
     
-
-        #print(f'roi feat base, novel, aug {base_bbox_feats.shape, bbox_feats.shape, bbox_feats_aug.shape}')
-
         base_bbox_pred = self.bbox_head(base_bbox_feats)
 
         bbox_results = dict(bbox_pred=base_bbox_pred, bbox_feats=base_bbox_feats)
@@ -2571,8 +2601,6 @@ class Agnostic_RoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
             x_c.append(x[i].contiguous())
         x = tuple(x_c)
         rois = rois.contiguous()
-
-        #print(f'roi shape base, novel aug {base_rois.shape, aug_rois.shape, rois.shape}')
 
         bbox_results = self._bbox_forward(x, rois)
         

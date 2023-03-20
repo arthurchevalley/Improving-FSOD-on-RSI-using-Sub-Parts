@@ -71,13 +71,13 @@ ALL_CLASSES_SPLIT1_DIOR_clean = ['Golffield', 'Expressway Toll Station' ,'Trains
 
 
 
-DIOR_VAL = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior/ImageSets/Main/val.txt'
-DIOR_TRAIN = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior/ImageSets/Main/train.txt'
-DIOR_TEST = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior/ImageSets/Main/test.txt'
-DIOR_PATH = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior/ImageSets/Main/'
-DIOR_XML = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior/Annotations/'
+DIOR_VAL = '/home/data/dior/ImageSets/Main/val.txt'
+DIOR_TRAIN = '/home/data/dior/ImageSets/Main/train.txt'
+DIOR_TEST = '/home/data/dior/ImageSets/Main/test.txt'
+DIOR_PATH = '/home/data/dior/ImageSets/Main/'
+DIOR_XML = '/home/data/dior/Annotations/'
 
-DIOR_FSANN = '/home/archeval/mmdetection/CATNet/mmdetection/data/dior/few_shot_ann/'
+DIOR_FSANN = '/home/data/dior/few_shot_ann/'
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -96,14 +96,21 @@ def parse_args():
 
 
 def get_images_with_class(class_name, df):
+    """
+    Output the dataframe composed of a single class
+    """
     return df[(df == class_name).any(axis=1)]
 
 def create_few_shot_ann(directory=None, version_ann='v3', nbr_shots=None, save=True):
     """
-    
+    Create the few shot annotations for the DIOR dataset.
+
+    directory: indicate the train.txt file with all images of the train set. If set to None, uses the directory provided with parser
+    Version_ann: specifies which annotation version is being produced, i.e. to maintain multiple diverse annotation panels
+    nbr_shots: list of the number of shots to create annotations for. If set to None, uses the list from parser
+    save: Boolean to indicate whether the annotations are saved or not
     """
 
-    import os.path
         
     args = parse_args()
     print(directory)
@@ -187,8 +194,7 @@ def create_few_shot_ann(directory=None, version_ann='v3', nbr_shots=None, save=T
                 # for hard it takes the images with least instances
                 elif args.few_shot_ann == 'hard':
                     df_novel = files_of_current_class.nsmallest(shot, ['nbr_instances'])
-                    #print(df_novel)
-                    #print("======")
+                    
                     if isinstance(df_novel, str):
                         data = np.array([df_novel['file'].unique()]).T
                     else: 
@@ -198,13 +204,11 @@ def create_few_shot_ann(directory=None, version_ann='v3', nbr_shots=None, save=T
                 file_cycle = cycle(files_names)
                 files_names = [next(file_cycle) for i in range(shot)]
                 used_file += files_names
-                if save:
-                #creating a new directory 
-                    
+                if save:                    
                     Path(args.save_dir+version_ann).mkdir(parents=True, exist_ok=True)
                     save_path = args.save_dir+version_ann+args.few_shot_ann+'_benchmark_'+str(shot)+'shot'
                     Path(save_path).mkdir(parents=True, exist_ok=True)
-                    #np.savetxt(save_path+'/box_'+str(shot)+'shot_'+curent_class_name+'_train.txt', files_names, fmt='%s')
+
                     if 'train' in directory:
                         with open(save_path+'/box_'+str(shot)+'shot_'+curent_class_name+'_train.txt', 'w') as f:
                             for element in files_names[0]:
@@ -219,7 +223,9 @@ def create_few_shot_ann(directory=None, version_ann='v3', nbr_shots=None, save=T
                         print('problem in directory selected. Not train nor validation')
 
 def do_nice_graphs(input_path):
-
+    """
+    Compute diverse graphs such as size, area and aspect ratio distribution per class
+    """
     import os.path
     args = parse_args()
     
@@ -432,10 +438,12 @@ def do_nice_graphs(input_path):
         fig.savefig(f'ratio_plot.pdf', transparent=True)
 
 def check_bbox_per_file(version_ann=None):
-    
+    """
+    Compute the number of instances of each class for the few shot annotation of base and novel classes
+    """
     args = parse_args()
     # assign directory
-    bizr = []
+
     dict_cntr = {}
     for key in ALL_CLASSES_SPLIT1_DIOR_L:
         dict_cntr[key] = 0
@@ -446,7 +454,7 @@ def check_bbox_per_file(version_ann=None):
             print(f'comp: {comp}')
             few_and_val = []
             new_train = []
-            #save_path_dior = DIOR_PATH + 'train_' + str(shot) + 'shots.txt'
+
             all_class_2 = []
             for cclass in ALL_CLASSES_SPLIT1_DIOR_L:
                 if version_ann is None:

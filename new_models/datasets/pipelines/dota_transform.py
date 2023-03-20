@@ -6,6 +6,9 @@ import torch
 
 @PIPELINES.register_module()
 class FliterEmpty:
+    """
+    Remove empty images
+    """
 
     def __call__(self, results):
         num_objs = 0
@@ -100,7 +103,9 @@ class DOTASpecialIgnore(object):
 
 @PIPELINES.register_module()
 class SaveTransformed(object):
-
+    """
+    Save trnasformed images
+    """
     def __init__(self,
                  save_directory='/home/archeval/FSOD_remote/ds_browse/',
                  id_init = 0):
@@ -108,7 +113,7 @@ class SaveTransformed(object):
         self.id = id_init
     def __call__(self, results):
         if self.directory is not None:
-            #im = Image.open(im_tif)
+
             img = results['img']
             gt_bboxes = results['gt_bboxes']
 

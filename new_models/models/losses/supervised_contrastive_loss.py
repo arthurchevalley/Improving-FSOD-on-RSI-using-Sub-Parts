@@ -41,7 +41,6 @@ def cross_entropy(pred,
     # element-wise losses
 
     lbl_msk = (label == nbr_cls).float() 
-    #bg_msk = 2*(label == nbr_cls).float() 
     
     label_argmax = torch.argmax(pred,dim=1)
     
@@ -49,12 +48,9 @@ def cross_entropy(pred,
     label_argmax_pos = (label_argmax != nbr_cls).float()
     agn_lbl = torch.stack((label_argmax_pos, label_argmax_neg), dim=1)
     
-    # have a 
-    #agn_lbl = (lbl_msk + bg_msk).to(int)
     lbl_msk = lbl_msk.long()
     agn_lbl = agn_lbl.float()
     
-    #print(dict().shape)
     loss = F.cross_entropy(
         agn_lbl,
         lbl_msk,
@@ -622,6 +618,8 @@ class QueueDualSupervisedContrastiveLoss(nn.Module):
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
 
+    Completed to handle the presence of a queue of contrastive features
+
     Args:
         temperature (float): A constant to be divided by consine similarity
             to enlarge the magnitude. Default: 0.2.
@@ -836,6 +834,11 @@ class QueueDualSupervisedContrastiveLoss_light(nn.Module):
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
 
+    DEPRACATED !
+
+    Completed to handle the presence of a queue of contrastive features including the background but as different class.
+    This light version removes the proposals with low IoU before computing the similarties matrix
+
     Args:
         temperature (float): A constant to be divided by consine similarity
             to enlarge the magnitude. Default: 0.2.
@@ -942,7 +945,7 @@ class QueueDualSupervisedContrastiveLoss_light(nn.Module):
                 
                 # mask with shape [N, N], mask_{i, j}=1
                 # if sample i and sample j have the same label
-                #print(f'lbl 1 {labels_1.unique()}, lbl 2 {labels_2.unique()}, queue {queue_trg.unique()}')
+
                 labels_2 = torch.cat((labels_1, labels_2, queue_trg), dim=0)
                 
                 if len(queue_res.shape) > 2:
@@ -1071,6 +1074,10 @@ class QueueDualSupervisedContrastiveLoss_light_bginqueue(nn.Module):
     """`Supervised Contrastive LOSS <https://arxiv.org/abs/2004.11362>`_.
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
+
+    Completed to handle the presence of a queue of contrastive features including background proposals as a class.
+    This light version removes the proposals with low IoU before computing the similarties matrix.
+
 
     Args:
         temperature (float): A constant to be divided by consine similarity
@@ -1302,6 +1309,10 @@ class QueueDualSupervisedContrastiveLoss_light_nobg(nn.Module):
     """`Supervised Contrastive LOSS <https://arxiv.org/abs/2004.11362>`_.
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
+
+    Completed to handle the presence of a queue of contrastive features excluding background proposals.
+    This light version removes the proposals with low IoU before computing the similarties matrix.
+
 
     Args:
         temperature (float): A constant to be divided by consine similarity
@@ -1542,6 +1553,10 @@ class QueueDualSupervisedContrastiveLoss_light_class(nn.Module):
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
 
+    Completed to handle the presence of a queue per class of contrastive.
+    This light version removes the proposals with low IoU before computing the similarties matrix.
+
+
     Args:
         temperature (float): A constant to be divided by consine similarity
             to enlarge the magnitude. Default: 0.2.
@@ -1722,6 +1737,11 @@ class QueueDualSupervisedContrastiveLoss_class(nn.Module):
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
 
+    DEPRACATED ! as background is composed of multiple class
+
+    Completed to handle the presence of a queue per class of contrastive.
+
+
     Args:
         temperature (float): A constant to be divided by consine similarity
             to enlarge the magnitude. Default: 0.2.
@@ -1818,28 +1838,23 @@ class QueueDualSupervisedContrastiveLoss_class(nn.Module):
             labels_2 = torch.cat((labels_1, labels_2), dim=0)
 
             mask_background = labels_2.reshape(-1) < nbr_classes
-            #labels_2 = labels_2[mask_background]
-            #print(labels_2.unique(), queue_trg.unique(), labels_2.shape)
-            
+
             features_2 = torch.cat((features_1, features_2), dim=0)
-            #features_2 = features_2[mask_background]
 
             keep_queue_trg = queue_trg.reshape(-1)
             keep_queue_trg = keep_queue_trg >= 0
 
             queue_res = queue_res[keep_queue_trg]
             queue_trg = queue_trg[keep_queue_trg]
-            #print(queue_trg.unique(), labels_2.unique())
+
             sim = torch.div(torch.matmul(features_2, queue_res.clone().T), self.temperature)
 
-            #print(dict().shape)
             sim_row_maxq, _ = torch.max(sim, dim=1, keepdim=True)
             sim = sim - sim_row_maxq.detach()
             esim = torch.exp(sim)
             log_probq = sim - torch.log(esim.sum(dim=1, keepdim=True))
 
             label_maskq = (torch.eq(labels_2, queue_trg.clone().T)).float().to(log_probq.device)
-            #print(f'unique lbl {labels_2.unique()} trf queue {queue_trg.unique()}')
             
             
             del sim
@@ -1907,6 +1922,8 @@ class QueueDualSupervisedContrastiveLoss_class(nn.Module):
 class QueueDualSupervisedContrastiveLoss_class_weighted(nn.Module):
     """`Supervised Contrastive LOSS <https://arxiv.org/abs/2004.11362>`_.
 
+    NOT  USED ! 
+
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
 
     Args:
@@ -2005,11 +2022,9 @@ class QueueDualSupervisedContrastiveLoss_class_weighted(nn.Module):
             labels_2 = torch.cat((labels_1, labels_2), dim=0)
 
             mask_background = labels_2.reshape(-1) < nbr_classes
-            #labels_2 = labels_2[mask_background]
-            #print(labels_2.unique(), queue_trg.unique(), labels_2.shape)
-            
+
+
             features_2 = torch.cat((features_1, features_2), dim=0)
-            #features_2 = features_2[mask_background]
 
             keep_queue_trg = queue_trg.reshape(-1)
             keep_queue_trg = keep_queue_trg >= 0
@@ -2025,9 +2040,7 @@ class QueueDualSupervisedContrastiveLoss_class_weighted(nn.Module):
             log_probq = sim - torch.log(esim.sum(dim=1, keepdim=True))
 
             label_maskq = (torch.eq(labels_2, queue_trg.clone().T)).float().to(log_probq.device)
-            #print(f'unique lbl {labels_2.unique()} trf queue {queue_trg.unique()}')
-            
-            
+                        
             del sim
             del esim
             torch.cuda.empty_cache()
@@ -2095,6 +2108,9 @@ class QueueDualSupervisedContrastiveLoss_class_nobg(nn.Module):
     """`Supervised Contrastive LOSS <https://arxiv.org/abs/2004.11362>`_.
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
+
+
+    Completed to handle the presence of a queue per class of contrastive excluding the background.
 
     Args:
         temperature (float): A constant to be divided by consine similarity
@@ -2283,6 +2299,8 @@ class QueueDualSupervisedContrastiveLoss_class_withbgqueue(nn.Module):
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
 
+    Completed to handle the presence of a queue per class of contrastive including the background as a class only in the queue.
+
     Args:
         temperature (float): A constant to be divided by consine similarity
             to enlarge the magnitude. Default: 0.2.
@@ -2364,9 +2382,9 @@ class QueueDualSupervisedContrastiveLoss_class_withbgqueue(nn.Module):
             if decay_rate is not None:
                 loss_weight = self.loss_weight * decay_rate
             if classes_equi is not None:
-                #print(f'class eq {classes_equi}')
+
                 classes_equi[nbr_classes]=nbr_classes
-                #print(f'lbl 1 {labels_1.unique()} lbl 2 {labels_2.unique()}')
+
                 if (labels_1 > nbr_classes).any():
                     labels_1 = torch.tensor([classes_equi[int(i)] for i in labels_1]).to(features_1.device)
                 if (labels_2 > nbr_classes).any():
@@ -2379,7 +2397,7 @@ class QueueDualSupervisedContrastiveLoss_class_withbgqueue(nn.Module):
             if len(labels_2.shape) == 1:
                 labels_2 = labels_2.reshape(-1, 1)
             labels_2 = torch.cat((labels_1, labels_2), dim=0)
-            #print(labels_2.unique(), queue_trg.unique(), labels_2.shape)
+
             mask_background = labels_2.reshape(-1) < nbr_classes
             labels_2 = labels_2[mask_background]
             
@@ -2392,18 +2410,16 @@ class QueueDualSupervisedContrastiveLoss_class_withbgqueue(nn.Module):
             keep_queue_trg = keep_queue_trg >= 0
             queue_res = queue_res[keep_queue_trg]
             queue_trg = queue_trg[keep_queue_trg]
-            print(queue_trg)
+
             sim = torch.div(torch.matmul(queue_res.clone(), features_2.T), self.temperature)
-            print(f'sim shape T {sim.shape}')
             sim = torch.div(torch.matmul(features_2, queue_res.clone().T), self.temperature)
-            print(f'sim shape {sim.shape}')
+
             sim_row_maxq, sim_row_maxid = torch.max(sim, dim=1, keepdim=True)
             sim = sim - sim_row_maxq.detach()
             esim = torch.exp(sim)
             log_probq = sim - torch.log(esim.sum(dim=1, keepdim=True))
 
             label_maskq = (torch.eq(labels_2, queue_trg.clone().T)).float().to(log_probq.device)
-            #print(f'unique lbl {labels_2.unique()} trf queue {queue_trg.unique()}')
             
             
             del sim
@@ -2473,6 +2489,9 @@ class QueueDualSupervisedContrastiveLoss_class_withbgqueue_all(nn.Module):
     """`Supervised Contrastive LOSS <https://arxiv.org/abs/2004.11362>`_.
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
+
+    Completed to handle the presence of a queue per class of contrastive including the background as a class in the queue.
+    Compute the contrastive loss between the queue and the Sub-Part, object and Augmented Sub-parts.
 
     Args:
         temperature (float): A constant to be divided by consine similarity
@@ -2558,9 +2577,8 @@ class QueueDualSupervisedContrastiveLoss_class_withbgqueue_all(nn.Module):
             if decay_rate is not None:
                 loss_weight = self.loss_weight * decay_rate
             if classes_equi is not None:
-                #print(f'class eq {classes_equi}')
                 classes_equi[nbr_classes]=nbr_classes
-                #print(f'lbl 1 {labels_1.unique()} lbl 2 {labels_2.unique()}')
+
                 if (labels_1 > nbr_classes).any():
                     labels_1 = torch.tensor([classes_equi[int(i)] for i in labels_1]).to(features_1.device)
                 if (labels_2 > nbr_classes).any():
@@ -2577,7 +2595,6 @@ class QueueDualSupervisedContrastiveLoss_class_withbgqueue_all(nn.Module):
             if len(labels_3.shape) == 1:
                 labels_3 = labels_3.reshape(-1, 1)
             labels_2 = torch.cat((labels_1, labels_2, labels_3), dim=0)
-            #print(labels_2.unique(), queue_trg.unique(), labels_2.shape)
             mask_background = labels_2.reshape(-1) < nbr_classes
             labels_2 = labels_2[mask_background]
             
@@ -2585,11 +2602,7 @@ class QueueDualSupervisedContrastiveLoss_class_withbgqueue_all(nn.Module):
             features_2 = torch.cat((features_1, features_2, features_3), dim=0)
             features_2 = features_2[mask_background]
 
-            #keep_queue_trg = queue_trg.reshape(-1)
 
-            #keep_queue_trg = keep_queue_trg >= 0
-            #queue_res = queue_res[keep_queue_trg]
-            #queue_trg = queue_trg[keep_queue_trg]
 
             sim = torch.div(torch.matmul(features_2, queue_res.clone().T), self.temperature)
 
@@ -2599,7 +2612,6 @@ class QueueDualSupervisedContrastiveLoss_class_withbgqueue_all(nn.Module):
             log_probq = sim - torch.log(esim.sum(dim=1, keepdim=True))
 
             label_maskq = (torch.eq(labels_2, queue_trg.clone().T)).float().to(log_probq.device)
-            #print(f'unique lbl {labels_2.unique()} trf queue {queue_trg.unique()}')
             
             
             del sim
@@ -2670,6 +2682,7 @@ class QueueDualSupervisedContrastiveLoss_class_withbg(nn.Module):
     """`Supervised Contrastive LOSS <https://arxiv.org/abs/2004.11362>`_.
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
+    Completed to handle the presence of a queue per class of contrastive including the background as a class.
 
     Args:
         temperature (float): A constant to be divided by consine similarity
@@ -2770,13 +2783,7 @@ class QueueDualSupervisedContrastiveLoss_class_withbg(nn.Module):
             
             
             features_2 = torch.cat((features_1, features_2), dim=0)
-            #features_2 = features_2[mask_background]
 
-            #keep_queue_trg = queue_trg.reshape(-1)
-            #keep_queue_trg = keep_queue_trg >= 0
-
-            #queue_trg = queue_trg[keep_queue_trg]
-            #queue_res = queue_res[keep_queue_trg]
 
             sim = torch.div(torch.matmul(features_2, queue_res.clone().T), self.temperature)
             
@@ -2854,6 +2861,8 @@ class QueueDualSupervisedContrastiveLoss_class_all(nn.Module):
     """`Supervised Contrastive LOSS <https://arxiv.org/abs/2004.11362>`_.
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
+    Completed to handle the presence of a queue per class of contrastive excluding the background in the queue.
+    Compute the contrastive loss between the queue and the Sub-Part, object and Augmented Sub-parts.
 
     Args:
         temperature (float): A constant to be divided by consine similarity
@@ -3044,6 +3053,9 @@ class QueueDualSupervisedContrastiveLoss_light_classif(nn.Module):
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
 
+
+    Unsecesfull attempt at using the contrative loss on classifiation features.
+
     Args:
         temperature (float): A constant to be divided by consine similarity
             to enlarge the magnitude. Default: 0.2.
@@ -3125,10 +3137,6 @@ class QueueDualSupervisedContrastiveLoss_light_classif(nn.Module):
                 classes_equi[nbr_classes]=nbr_classes
                 if (labels_1 > nbr_classes).any():
                     labels_1 = torch.tensor([classes_equi[int(i)] for i in labels_1]).to(features_1.device)
-                
-
-            #if len(labels_1.shape) == 1:
-            #    labels_1 = labels_1.reshape(-1, 1)
 
             keep_queue = ious_1.clone()
             keep_queue = keep_queue >= self.iou_threshold
@@ -3197,6 +3205,11 @@ class QueueDualSupervisedContrastiveLoss_light_all(nn.Module):
     """`Supervised Contrastive LOSS <https://arxiv.org/abs/2004.11362>`_.
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
+
+    Completed to handle the presence of a queue per class of contrastive including the background as a class.
+    Compute the contrastive loss between the queue and the Sub-Part, object and Augmented Sub-parts.
+
+    The light loss remove the proposals with low IoU before computing the simmilarities matrix.
 
     Args:
         temperature (float): A constant to be divided by consine similarity
@@ -3445,6 +3458,7 @@ class QueueDualSupervisedContrastiveLoss_light_Neg(nn.Module):
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
 
+    OLD TESTS NOT USED
     Args:
         temperature (float): A constant to be divided by consine similarity
             to enlarge the magnitude. Default: 0.2.
@@ -3590,8 +3604,6 @@ class QueueDualSupervisedContrastiveLoss_light_Neg(nn.Module):
             features_2 = features_2[keep_queue]
             labels_2 = labels_2[keep_queue]
 
-            print(f'features norm: {torch.norm(features_2)}')
-
             similarityq = torch.div(torch.matmul(features_2, features_2.T), self.temperature)
             del features_2
             del features_1
@@ -3671,6 +3683,7 @@ class QueueDualSupervisedContrastiveLossBU(nn.Module):
 
     This part of code is modified from https://github.com/MegviiDetection/FSCE.
 
+    Backup of the supervised contrastive loss
     Args:
         temperature (float): A constant to be divided by consine similarity
             to enlarge the magnitude. Default: 0.2.
@@ -3766,13 +3779,7 @@ class QueueDualSupervisedContrastiveLossBU(nn.Module):
             labels_1 = labels_1.reshape(-1,1)
             labels_2 = labels_2.reshape(-1,1)
             queue_trg = queue_trg.reshape(-1,1)
-           # print(f'shape {labels_1.shape, labels_2.shape, queue_trg.shape}')
-
-            #labels_2 = torch.cat((labels_1, labels_2, queue_trg), dim=1)
             
-            # mask with shape [N, N], mask_{i, j}=1
-            # if sample i and sample j have the same label
-            #labels_2 = labels_2.reshape(-1, 1)
             labels_2 = torch.cat((labels_1, labels_2, queue_trg), dim=0)
 
             queue_res = torch.moveaxis(queue_res, 0,2)
@@ -3788,37 +3795,12 @@ class QueueDualSupervisedContrastiveLossBU(nn.Module):
                 features_1 = torch.moveaxis(features_1, 1,2)
                 features_1 = features_1.reshape(-1, features_1.shape[2])
             
-            #features_2 = torch.cat((torch.unsqueeze(features_1, dim=2), torch.unsqueeze(features_2, dim=2), queue_res), dim=2)
-           # print(f'shape {features_1.shape, features_2.shape, queue_res.shape}')
-
             features_2 = torch.cat((features_1, features_2, queue_res), dim=0)
-           # print(f'shape {features_2.shape}')
-           # print('======')
-            #features_2 = torch.moveaxis(features_2, 2, 1)
-
-            #features_2 = features_2.reshape(-1, features_2.shape[2])
             del queue_res
         else:
-           # if labels_1.shape[0] == labels_2.shape[0]:
             labels_2 = torch.cat((labels_1, labels_2), dim=0)
-                
-           # elif labels_1.shape[1] == labels_2.shape[1]:
-           #     labels_2 = torch.cat((labels_1, labels_2), dim=0)
-                
-                # mask with shape [N, N], mask_{i, j}=1
-                # if sample i and sample j have the same label
-           #     labels_2 = labels_2.reshape(-1, 1)
-           # else:
-           #     labels_2 = torch.cat((torch.unsqueeze(labels_1, dim=2), torch.unsqueeze(labels_2, dim=2)), dim=2)
-                
-                # mask with shape [N, N], mask_{i, j}=1
-                # if sample i and sample j have the same label
-           #     labels_2 = labels_2.reshape(-1, 1)
 
             features_2 = torch.cat((features_1, features_2), dim=0)
-            #features_2 = torch.moveaxis(features_2, 2, 1)
-
-            #features_2 = features_2.reshape(-1, features_2.shape[2])
 
         similarityq = torch.div(torch.matmul(features_2, features_2.T), self.temperature)
         del features_2
@@ -3842,15 +3824,12 @@ class QueueDualSupervisedContrastiveLossBU(nn.Module):
         del labels_2
         lbl_lengthq = label_maskq.sum(1)
         lbl_lengthq[lbl_lengthq == 0] = 1
-        #per_label_log_probq = (log_probq * logits_mask.to(log_probq.get_device()) * label_maskq).sum(1) / lbl_lengthq
-        print(f'shapes {log_probq.shape, logits_mask.shape, label_maskq.shape}')
         log_probq = (log_probq * logits_mask.to(log_probq.get_device()) * label_maskq).sum(1) / lbl_lengthq
         
         if queue_trg is not None:
             ious_1 = ious_1.reshape(-1, 1)
             ious_2 = ious_2.reshape(-1, 1)
             queue_iou = queue_iou.reshape(-1, 1)
-            #keep_queue = torch.cat((torch.unsqueeze(ious_1, dim=0), torch.unsqueeze(ious_2, dim=0), queue_iou), dim=0)
             keep_queue = torch.cat((ious_1, ious_2, queue_iou), dim=0)
         else:
             keep_queue = torch.cat((ious_1, ious_2), dim=0)
@@ -3859,12 +3838,10 @@ class QueueDualSupervisedContrastiveLossBU(nn.Module):
         keep_queue = keep_queue >= self.iou_threshold
         if keep_queue.sum() == 0:
             # return zero loss
-            #return per_label_log_probq.sum() * 0
             return log_probq.sum() * 0
-        #per_label_log_probq = per_label_log_probq[keep_queue]
+
         log_probq = log_probq[keep_queue]
 
-        #loss = -per_label_log_probq
         loss = -log_probq
 
         if weight is not None:
@@ -3939,20 +3916,19 @@ def py_sigmoid_focal_loss(pred,
         avg_factor (int, optional): Average factor that is used to average
             the loss. Defaults to None.
     """
-    #print(pred.shape)
+
     pred_sigmoid = pred.sigmoid()
-    #print(pred_sigmoid.shape)
+
     target = F.one_hot(target, num_classes=pred.shape[1]).type_as(pred)
 
     ce = target*(-torch.log(pred_sigmoid))
     w = target*(((1 - pred_sigmoid)/threshold_reduce).pow(gamma))
     msk = pred_sigmoid < threshold_reduce
     w[msk] = 1
-    #print(ce.shape, w.shape, msk.shape)
+
     loss = alpha*(w*ce)
     
 
-    #loss = F.cross_entropy_with_logits(pred, target, reduction='none') * focal_weight
     if weight is not None:
         if weight.shape != loss.shape:
             if weight.size(0) == loss.size(0):

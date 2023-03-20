@@ -349,7 +349,27 @@ class AugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
 class QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
+    Modified BBOX head for the addition of the  contrastive queue
+
     Args:
+        loss_cosine: loss between Sub-Parts and "true" objects
+        loss_c_cls: loss between Sub-Parts and non-augmented elemnts,
+        loss_base_aug: loss between augmented and non-augmented elements
+        loss_c_bbox: "contrastive" regression loss
+        loss_all: loss contrasting all element in a single loss
+        contrast_loss_classif: potential classification loss using the contrative vector
+        to_norm_cls (bool): define if the cls vector is normalised
+        main_training (bool): define if it is the base training or fine-tuning
+        same_class = False,
+        same_class_all = False,
+        queue_path (str): define the path, if any, if the queue to load
+        use_queue (bool): define the queue is used or not
+        use_base_queue (bool): define if "base" object, i.e. true ones, are used in the queue
+        use_novel_queue (bool): define if Sub-Parts are used in the queue
+        use_aug_queue (bool): define if augmented Sub-Parts are used in the queue
+        queue_length (int): define the queue length, default = 60
+        num_proposals (int): define the contrastive feature vector length
+
         mlp_head_channels (int): Output channels of contrast branch
             mlp. Default: 128.
         with_weight_decay (bool): Whether to decay loss weight. Default: False.
@@ -358,6 +378,7 @@ class QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
         learnable_scale (bo ol): Learnable global scaling factor.
             Default: False.
         eps (float): Constant variable to avoid division by zero.
+        
     """
 
     def __init__(self,
@@ -1794,7 +1815,28 @@ class QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
 class QueueAugContrastiveBBoxHead_Branch_classqueue(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
+    DEPRACATED
+    Modified BBOX head for the addition of the  contrastive queue per class
+
     Args:
+        loss_cosine: loss between Sub-Parts and "true" objects
+        loss_c_cls: loss between Sub-Parts and non-augmented elemnts,
+        loss_base_aug: loss between augmented and non-augmented elements
+        loss_c_bbox: "contrastive" regression loss
+        loss_all: loss contrasting all element in a single loss
+        contrast_loss_classif: potential classification loss using the contrative vector
+        to_norm_cls (bool): define if the cls vector is normalised
+        main_training (bool): define if it is the base training or fine-tuning
+        same_class = False,
+        same_class_all = False,
+        queue_path (str): define the path, if any, if the queue to load
+        use_queue (bool): define the queue is used or not
+        use_base_queue (bool): define if "base" object, i.e. true ones, are used in the queue
+        use_novel_queue (bool): define if Sub-Parts are used in the queue
+        use_aug_queue (bool): define if augmented Sub-Parts are used in the queue
+        queue_length (int): define the queue length, default = 60
+        num_proposals (int): define the contrastive feature vector length
+
         mlp_head_channels (int): Output channels of contrast branch
             mlp. Default: 128.
         with_weight_decay (bool): Whether to decay loss weight. Default: False.
@@ -3048,7 +3090,27 @@ class QueueAugContrastiveBBoxHead_Branch_classqueue(Shared2FCBBoxHeadUpdate):
 class QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
+    Modified BBOX head for the addition of the  contrastive queue per class with an updated replacement of the element in the queue
+
     Args:
+        loss_cosine: loss between Sub-Parts and "true" objects
+        loss_c_cls: loss between Sub-Parts and non-augmented elemnts,
+        loss_base_aug: loss between augmented and non-augmented elements
+        loss_c_bbox: "contrastive" regression loss
+        loss_all: loss contrasting all element in a single loss
+        contrast_loss_classif: potential classification loss using the contrative vector
+        to_norm_cls (bool): define if the cls vector is normalised
+        main_training (bool): define if it is the base training or fine-tuning
+        same_class = False,
+        same_class_all = False,
+        queue_path (str): define the path, if any, if the queue to load
+        use_queue (bool): define the queue is used or not
+        use_base_queue (bool): define if "base" object, i.e. true ones, are used in the queue
+        use_novel_queue (bool): define if Sub-Parts are used in the queue
+        use_aug_queue (bool): define if augmented Sub-Parts are used in the queue
+        queue_length (int): define the queue length, default = 60
+        num_proposals (int): define the contrastive feature vector length
+
         mlp_head_channels (int): Output channels of contrast branch
             mlp. Default: 128.
         with_weight_decay (bool): Whether to decay loss weight. Default: False.
@@ -4471,7 +4533,27 @@ class QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBBoxHeadUpd
 class QueueAugContrastiveBBoxHead_Branch_classqueue_replace_withbg(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
+    Modified BBOX head for the addition of the contrastive queue per class including background proposals
+
     Args:
+        loss_cosine: loss between Sub-Parts and "true" objects
+        loss_c_cls: loss between Sub-Parts and non-augmented elemnts,
+        loss_base_aug: loss between augmented and non-augmented elements
+        loss_c_bbox: "contrastive" regression loss
+        loss_all: loss contrasting all element in a single loss
+        contrast_loss_classif: potential classification loss using the contrative vector
+        to_norm_cls (bool): define if the cls vector is normalised
+        main_training (bool): define if it is the base training or fine-tuning
+        same_class = False,
+        same_class_all = False,
+        queue_path (str): define the path, if any, if the queue to load
+        use_queue (bool): define the queue is used or not
+        use_base_queue (bool): define if "base" object, i.e. true ones, are used in the queue
+        use_novel_queue (bool): define if Sub-Parts are used in the queue
+        use_aug_queue (bool): define if augmented Sub-Parts are used in the queue
+        queue_length (int): define the queue length, default = 60
+        num_proposals (int): define the contrastive feature vector length
+
         mlp_head_channels (int): Output channels of contrast branch
             mlp. Default: 128.
         with_weight_decay (bool): Whether to decay loss weight. Default: False.
@@ -5856,7 +5938,7 @@ class QueueAugContrastiveBBoxHead_Branch_classqueue_replace_withbg(Shared2FCBBox
 @HEADS.register_module()
 class Agnostic_BBoxHead_Branch(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
-
+    Modified to be an class-agnostic bbox head
     Args:
         mlp_head_channels (int): Output channels of contrast branch
             mlp. Default: 128.
@@ -5966,7 +6048,27 @@ class Agnostic_BBoxHead_Branch(Shared2FCBBoxHeadUpdate):
 class Agnostic_QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
+    Modified BBOX head for the addition of the  contrastive queue and to be class-agnostic
+
     Args:
+        loss_cosine: loss between Sub-Parts and "true" objects
+        loss_c_cls: loss between Sub-Parts and non-augmented elemnts,
+        loss_base_aug: loss between augmented and non-augmented elements
+        loss_c_bbox: "contrastive" regression loss
+        loss_all: loss contrasting all element in a single loss
+        contrast_loss_classif: potential classification loss using the contrative vector
+        to_norm_cls (bool): define if the cls vector is normalised
+        main_training (bool): define if it is the base training or fine-tuning
+        same_class = False,
+        same_class_all = False,
+        queue_path (str): define the path, if any, if the queue to load
+        use_queue (bool): define the queue is used or not
+        use_base_queue (bool): define if "base" object, i.e. true ones, are used in the queue
+        use_novel_queue (bool): define if Sub-Parts are used in the queue
+        use_aug_queue (bool): define if augmented Sub-Parts are used in the queue
+        queue_length (int): define the queue length, default = 60
+        num_proposals (int): define the contrastive feature vector length
+
         mlp_head_channels (int): Output channels of contrast branch
             mlp. Default: 128.
         with_weight_decay (bool): Whether to decay loss weight. Default: False.
@@ -7377,7 +7479,27 @@ class Agnostic_QueueAugContrastiveBBoxHead_Branch(Shared2FCBBoxHeadUpdate):
 class Agnostic_QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
+    Modified class-agnostic BBOX head for the addition of the  contrastive queue per class with an update update mechanism
+
     Args:
+        loss_cosine: loss between Sub-Parts and "true" objects
+        loss_c_cls: loss between Sub-Parts and non-augmented elemnts,
+        loss_base_aug: loss between augmented and non-augmented elements
+        loss_c_bbox: "contrastive" regression loss
+        loss_all: loss contrasting all element in a single loss
+        contrast_loss_classif: potential classification loss using the contrative vector
+        to_norm_cls (bool): define if the cls vector is normalised
+        main_training (bool): define if it is the base training or fine-tuning
+        same_class = False,
+        same_class_all = False,
+        queue_path (str): define the path, if any, if the queue to load
+        use_queue (bool): define the queue is used or not
+        use_base_queue (bool): define if "base" object, i.e. true ones, are used in the queue
+        use_novel_queue (bool): define if Sub-Parts are used in the queue
+        use_aug_queue (bool): define if augmented Sub-Parts are used in the queue
+        queue_length (int): define the queue length, default = 60
+        num_proposals (int): define the contrastive feature vector length
+
         mlp_head_channels (int): Output channels of contrast branch
             mlp. Default: 128.
         with_weight_decay (bool): Whether to decay loss weight. Default: False.
@@ -8864,7 +8986,27 @@ class Agnostic_QueueAugContrastiveBBoxHead_Branch_classqueue_replace(Shared2FCBB
 class Agnostic_QueueAugContrastiveBBoxHead_Branch_classqueue_replace_withbg(Shared2FCBBoxHeadUpdate):
     """BBoxHead for `FSCE <https://arxiv.org/abs/2103.05950>`_.
 
+    Modified class-agnostic BBOX head for the addition of the  contrastive queue per class including background with an update update mechanism
+
     Args:
+        loss_cosine: loss between Sub-Parts and "true" objects
+        loss_c_cls: loss between Sub-Parts and non-augmented elemnts,
+        loss_base_aug: loss between augmented and non-augmented elements
+        loss_c_bbox: "contrastive" regression loss
+        loss_all: loss contrasting all element in a single loss
+        contrast_loss_classif: potential classification loss using the contrative vector
+        to_norm_cls (bool): define if the cls vector is normalised
+        main_training (bool): define if it is the base training or fine-tuning
+        same_class = False,
+        same_class_all = False,
+        queue_path (str): define the path, if any, if the queue to load
+        use_queue (bool): define the queue is used or not
+        use_base_queue (bool): define if "base" object, i.e. true ones, are used in the queue
+        use_novel_queue (bool): define if Sub-Parts are used in the queue
+        use_aug_queue (bool): define if augmented Sub-Parts are used in the queue
+        queue_length (int): define the queue length, default = 60
+        num_proposals (int): define the contrastive feature vector length
+
         mlp_head_channels (int): Output channels of contrast branch
             mlp. Default: 128.
         with_weight_decay (bool): Whether to decay loss weight. Default: False.

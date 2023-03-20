@@ -185,11 +185,8 @@ def random_init_checkpoint(param_name, is_weight, tar_size, checkpoint, args):
         if 'fc_cls' in param_name:
             new_weight[-1] = pretrained_weight[-1]  # bg class
         old_w = checkpoint['state_dict'][weight_name]
-        print('==========')
-        print(f'name {weight_name}')
-        print(f'before {old_w}')
+
         checkpoint['state_dict'][weight_name] = new_weight
-        print(f'after {new_weight}')
 
 def random_init_checkpoint_contrastive_head(param_name, is_weight, tar_size, checkpoint, args):
     """Either remove the final layer weights for fine-tuning on novel dataset
@@ -233,10 +230,9 @@ def random_init_checkpoint_contrastive_head(param_name, is_weight, tar_size, che
             checkpoint['state_dict'][weight_name] = new_weight
     elif is_weight and 'trg' in param_name:
         pretrained_weight = checkpoint['state_dict'][param_name]
-        print(f'{param_name} shape {pretrained_weight}')
+        
         mask_background = pretrained_weight >= DIOR_SIZE_SPLIT_2
         pretrained_weight[mask_background] = DIOR_SIZE
-        print(f'{param_name} shape {pretrained_weight}')
     
 def combine_checkpoints(param_name, is_weight, tar_size, checkpoint,
                         checkpoint2, args):

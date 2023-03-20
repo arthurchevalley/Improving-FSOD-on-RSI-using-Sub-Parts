@@ -114,6 +114,8 @@ class ContrastiveFewShotDiorDataset(BaseFewShotDataset):
             not be changed while the predict results will minus the
             coordinate offsets to inverse data loading logic in training.
             Default: [-1, -1, 0, 0].
+
+        dior_folder_path (str): The DIOR folder path
     """
 
     def __init__(self,
@@ -693,6 +695,8 @@ class ContrastiveFewShotDiorDefaultDataset(ContrastiveFewShotDiorDataset):
             `method` and `setting` to get corresponding
             annotation from `self.DEFAULT_ANN_CONFIG`.
             For example: [dict(method='TFA', setting='SPILT1_1shot')].
+
+        dior_folder_path (str): The DIOR folder path
     """
 
     
@@ -764,6 +768,8 @@ class ContrastiveFewShotDiorDefaultDatasetNoDif(ContrastiveFewShotDiorDataset):
             `method` and `setting` to get corresponding
             annotation from `self.DEFAULT_ANN_CONFIG`.
             For example: [dict(method='TFA', setting='SPILT1_1shot')].
+
+        dior_folder_path (str): The DIOR folder path
     """
 
     
@@ -830,6 +836,8 @@ class ContrastiveFewShotDiorCopyDefaultDatasetNoDif(ContrastiveFewShotDiorDatase
     Args:
         ann_cfg (list[dict] | dict): contain `data_infos` from other
             dataset. Example: [dict(data_infos=FewShotVOCDataset.data_infos)]
+
+        dior_folder_path (str): The DIOR folder path
     """
 
     def __init__(self, ann_cfg: Union[List[Dict], Dict], **kwargs) -> None:

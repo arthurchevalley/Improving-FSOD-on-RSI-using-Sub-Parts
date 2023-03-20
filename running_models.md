@@ -142,3 +142,16 @@ Finally, to load those newly changed weights, they must be loaded using the foll
 ```shell
 load_from = ('work_dirs/base_contrastive_perclass_1_bbox_model_split2_random_init_bbox_head.pth')
 ```
+
+# Testing
+
+To test model run the following:
+```shell
+python tools/test.py config_file work_dirs/weight_file --work-dir test_results_folder/ --out output_name.pkl --gpu-id 0 --eval mAP
+```
+
+Once the test.py has been completed, to compute confusion matrix run:
+for cm:
+```shell
+python tools/analysis_tools/confusion_matrix.py config_file output_name test_results_folder/ --show 
+```

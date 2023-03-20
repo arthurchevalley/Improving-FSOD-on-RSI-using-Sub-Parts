@@ -76,6 +76,9 @@ def parse_args():
 
 
 def main():
+    """
+    Create a queue to load for the fine-tuning based on the base training queue
+    """
     args = parse_args()
     set_random_seed(args.seed)
     ckpt = torch.load(args.src1)
@@ -86,8 +89,7 @@ def main():
     queue_res = ckpt['state_dict']['roi_head.bbox_head.queue_res']
     queue_trg = ckpt['state_dict']['roi_head.bbox_head.queue_trg']
     queue_iou = ckpt['state_dict']['roi_head.bbox_head.queue_iou']
-    with open('per_class_features.p', 'rb') as fp:
-            data = pickle.load(fp)
+
     num_base_classes = args.nbr_base_class
     trg_queue_length = args.target_queue_length
     num_novel_classes = args.nbr_ft_class
@@ -157,6 +159,9 @@ def main():
 
 
 def main_nobg():
+    """
+    Create a queue to load for the fine-tuning excluding bakcground base on the base training queue
+    """
     args = parse_args()
     set_random_seed(args.seed)
     ckpt = torch.load(args.src1)
@@ -167,8 +172,7 @@ def main_nobg():
     queue_res = ckpt['state_dict']['roi_head.bbox_head.queue_res']
     queue_trg = ckpt['state_dict']['roi_head.bbox_head.queue_trg']
     queue_iou = ckpt['state_dict']['roi_head.bbox_head.queue_iou']
-    with open('per_class_features.p', 'rb') as fp:
-            data = pickle.load(fp)
+
     num_base_classes = 15
     trg_queue_length = 120
     num_novel_classes = 20

@@ -9,7 +9,11 @@ from .test_mixins import BBoxTestMixin, MaskTestMixin
 
 @HEADS.register_module()
 class CosContRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
-    """Simplest base roi head including one bbox head and one mask head."""
+    """
+    Old contrastive RoI handling
+
+    DEPRECATED
+    """
 
     def init_assigner_sampler(self):
         """Initialize assigner and sampler."""

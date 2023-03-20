@@ -101,22 +101,8 @@ class CIRLoss(nn.Module):
                  reduction='mean',
                  loss_weight=1.0,
                  avg_non_ignore=False):
-        """CIR.
-
-        Args:
-            use_sigmoid (bool, optional): Whether the prediction uses sigmoid
-                of softmax. Defaults to False.
-            use_mask (bool, optional): Whether to use mask cross entropy loss.
-                Defaults to False.
-            reduction (str, optional): . Defaults to 'mean'.
-                Options are "none", "mean" and "sum".
-            class_weight (list[float], optional): Weight of each class.
-                Defaults to None.
-            ignore_index (int | None): The label index to be ignored.
-                Defaults to None.
-            loss_weight (float, optional): Weight of the loss. Defaults to 1.0.
-            avg_non_ignore (bool): The flag decides to whether the loss is
-                only averaged over non-ignored targets. Default: False.
+        """CIR loss used in paper https://www.mdpi.com/2072-4292/14/14/3255.
+        Not finished and leading to no convenient results
         """
         super(CIRLoss, self).__init__()
         
@@ -165,9 +151,6 @@ class CIRLoss(nn.Module):
             torch.Tensor: The calculated loss.
         """
 
-        print(f'cir {cir_score.shape}')
-        
-        print(dict().shape)
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = (
             reduction_override if reduction_override else self.reduction)

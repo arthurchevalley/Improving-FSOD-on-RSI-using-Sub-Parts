@@ -2,4 +2,4 @@
 
 #from .closs import *
 
-from .augmentation_change_hook import AugmentationChange
+from .augmentation_change_hook import *

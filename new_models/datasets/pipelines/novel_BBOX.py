@@ -340,7 +340,7 @@ class ContrastiveCollect:
   
 @PIPELINES.register_module()
 class NimgContrastiveDefaultFormatBundle:
-    """Default formatting bundle.
+    """Default formatting bundle for contrastive branch
 
     It simplifies the pipeline of formatting common fields, including "img",
     "proposals", "gt_bboxes", "gt_labels", "gt_masks" and "gt_semantic_seg".
@@ -451,7 +451,7 @@ class NimgContrastiveDefaultFormatBundle:
 
 @PIPELINES.register_module()
 class ContrastiveRandomFlip:
-    """Flip the image & bbox & mask.
+    """Flip the image & bbox & mask for Sub-Parts
 
     If the input dict contains the key "flip", then the flag will be used,
     otherwise it will be randomly decided by a ratio specified in the init
@@ -765,7 +765,7 @@ class MultiRandomFlip:
 
 @PIPELINES.register_module()
 class NovelNormalize:
-    """Normalize the image.
+    """Normalize the image for Sub-Parts
 
     Added key is "img_norm_cfg".
 
@@ -808,7 +808,7 @@ class NovelNormalize:
 
 @PIPELINES.register_module()
 class ContrastiveDefaultFormatBundle:
-    """Default formatting bundle.
+    """Default formatting bundle for Sub-Parts
 
     It simplifies the pipeline of formatting common fields, including "img",
     "proposals", "gt_bboxes", "gt_labels", "gt_masks" and "gt_semantic_seg".
@@ -919,7 +919,7 @@ class ContrastiveDefaultFormatBundle:
 @PIPELINES.register_module()
 class ContrastiveRotate:
     """Apply Rotate Transformation to image (and its corresponding bbox, mask,
-    segmentation).
+    segmentation) for Sub-Parts
 
     Args:
         center (int | float | tuple[float]): Center point (w, h) of the
@@ -1036,7 +1036,7 @@ class ContrastiveRotate:
 
 @PIPELINES.register_module()
 class ContrastiveBrightnessTransform:
-    """Apply Brightness transformation to image. The bboxes, masks and
+    """Apply Brightness transformation to imagefor Sub-Parts. The bboxes, masks and
     segmentations are not modified.
 
     Args:
@@ -1086,7 +1086,7 @@ class ContrastiveBrightnessTransform:
 
 @PIPELINES.register_module()
 class ContrastiveContrastTransform:
-    """Apply Contrast transformation to image. The bboxes, masks and
+    """Apply Contrast transformation to image for Sub-Parts. The bboxes, masks and
     segmentations are not modified.
 
     Args:
@@ -1134,7 +1134,7 @@ class ContrastiveContrastTransform:
 
 @PIPELINES.register_module()
 class ContrastiveColorTransform:
-    """Apply Color transformation to image. The bboxes, masks, and
+    """Apply Color transformation to image for Sub-Parts. The bboxes, masks, and
     segmentations are not modified.
 
     Args:
